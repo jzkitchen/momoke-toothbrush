@@ -233,6 +233,17 @@ img { -webkit-user-drag: none; }
 .result-title { font-size: 36px; font-weight: 900; color: var(--pink-d); margin: 16px 0 6px; }
 .result-msg { font-size: 23px; font-weight: 700; line-height: 1.55; margin: 6px 4px 24px; color: var(--ink); }
 
+.face-tip {
+  display: inline-block; margin: 0 4px 18px; padding: 10px 18px;
+  border-radius: 22px; background: linear-gradient(180deg, #fff0f8, #f3e8ff);
+  border: 3px solid #ffb3da; color: var(--purple-d);
+  font-size: 20px; font-weight: 900; line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(155,107,255,.18);
+}
+#screen-capture .face-tip { margin: 4px 6px 14px; }
+#screen-result .result-msg { margin-bottom: 10px; }
+
+
 /* ---------- 捕捉動畫 ---------- */
 #screen-capture {
   justify-content: center; text-align: center; overflow: hidden; position: relative;

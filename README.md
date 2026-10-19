@@ -309,7 +309,7 @@ uv venv /workspace/.pwvenv && uv pip install --python /workspace/.pwvenv playwri
 
 ## 部署（GitHub Pages）
 
-網站：https://bella1219lee.github.io/momoke-toothbrush/ （公開 repo `bella1219lee/momoke-toothbrush`，branch `main`，根目錄）。
+網站：https://jzkitchen.github.io/momoke-toothbrush/ （公開 repo `jzkitchen/momoke-toothbrush`，branch `main`，根目錄）。
 
 1. 修改後把 `sw.js` 的 `VERSION` 和 `data.js` 的 `version` 一起加一（否則已安裝的 App 會繼續用舊快取）。
 2. 跑完上面兩個測試，全部通過。
@@ -318,5 +318,5 @@ uv venv /workspace/.pwvenv && uv pip install --python /workspace/.pwvenv playwri
    cd /workspace/momoke-app
    git add -A && git commit -m "說明這次修改" && git push
    ```
-4. 等 GitHub Pages 重新發佈（通常 1–2 分鐘），確認 `https://bella1219lee.github.io/momoke-toothbrush/sw.js` 已是新的 VERSION。
+4. 等 GitHub Pages 重新發佈（通常 1–2 分鐘），確認 `https://jzkitchen.github.io/momoke-toothbrush/sw.js` 已是新的 VERSION。
 5. iPhone 上關掉 App 再開一次（可能要開兩次），就會用新版本；資料會保留（舊資料會自動轉換）。
