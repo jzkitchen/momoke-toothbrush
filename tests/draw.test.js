@@ -463,7 +463,29 @@ console.log("✓ 日子與時段");
   assert.deepStrictEqual(ms.map((m) => m.name), names, "第二季萌可名稱與次序");
   assert.deepStrictEqual(ms.map((m) => m.id), names.map((_, i) => "s2-m-" + String(i + 1).padStart(2, "0")));
   eq(ms[0].category, "royal"); eq(ms[19].category, "villain"); eq(ms.filter((m) => m.category === "magic").length, 18);
-  ms.forEach((m) => ok(!m.blurb, "第二季萌可沒有簡介資料，不自行編寫：" + m.name));
+  const S2_BLURBS = [
+    "樂觀又天然呆，拿著泡泡槍，句尾「幸福」！",
+    "很冷靜，手拿冰棍，能讓周圍變冷。",
+    "最愛畫畫，手拿畫筆。",
+    "最愛健身，提著啞鈴。",
+    "喜歡倒立看世界，拿著磁鐵。",
+    "跑得很快，騎著滑板車。",
+    "很有童心，拿著手搖鈴。",
+    "總想打瞌睡，拿著吸塵器。",
+    "很黏人，拿著固體膠棒。",
+    "什麼都好奇，拿著放大鏡。",
+    "最愛玩具，玩著悠悠球。",
+    "會變裝，戴著舞會面具，句尾「變變變」。",
+    "喜歡花朵，拿著玫瑰花。",
+    "大的玩玩拿遊戲機，小的樂樂抱奶瓶。",
+    "容易嘆氣，拿著喇叭。",
+    "很愛上學，拿著鉛筆和書本。",
+    "很冰冷，拿著冰淇淋。",
+    "很興奮，拿著閃電權杖。",
+    "喜歡獨處，拿著釣魚竿。",
+    "第二季最終反派，拿著惡魔三叉戟，句尾「昂昂」！",
+  ];
+  assert.deepStrictEqual(ms.map((m) => m.blurb), S2_BLURBS, "第二季萌可簡介（v11）");
   if (fs.existsSync(MAN)) {
     const man = JSON.parse(fs.readFileSync(MAN, "utf8"));
     man.forEach((x, i) => { eq(ms[i].name, x.name, "name = manifest " + x.file); eq(path.basename(ms[i].img), x.file); });

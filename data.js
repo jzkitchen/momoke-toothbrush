@@ -26,7 +26,7 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v10",
+    version: "v11",
     seasons: [
       {
         id: "s1",
@@ -168,27 +168,27 @@
     { id: "s1-still-ep26a", season: "s1", type: "still", ep: 26, name: "萌可們", img: "img/stills/ep26_a.jpg", blurb: "第26集〈戀戀萌可的箭〉", intro: "萌可們圍在床邊看著勇氣萌可。" }, // s1_stills_v2/ep26_a.jpg
     { id: "s1-still-ep26b", season: "s1", type: "still", ep: 26, name: "樂美", img: "img/stills/ep26_b.jpg", blurb: "第26集〈戀戀萌可的箭〉", intro: "樂美在粉紅色房間裡露出笑容。" }, // s1_stills_v2/ep26_b.jpg
 
-    // ---- 第二季：20 萌可（圖片來自 img/s2/，名稱與次序來自 /workspace/momoke/images/s2/manifest.json；沒有第二季的簡介資料，所以不設 blurb）----
-    { id: "s2-m-01", season: "s2", type: "momoke", category: "royal", name: "幸福萌可", img: "img/s2/01_xingfu_v2.jpg" },
-    { id: "s2-m-02", season: "s2", type: "momoke", category: "magic", name: "冷冷萌可", img: "img/s2/02_lengleng_v2.jpg" },
-    { id: "s2-m-03", season: "s2", type: "momoke", category: "magic", name: "畫畫萌可", img: "img/s2/03_huahua_paint_v2.jpg" },
-    { id: "s2-m-04", season: "s2", type: "momoke", category: "magic", name: "重重萌可", img: "img/s2/04_zhongzhong_v2.jpg" },
-    { id: "s2-m-05", season: "s2", type: "momoke", category: "magic", name: "倒倒萌可", img: "img/s2/05_daodao_v2.jpg" },
-    { id: "s2-m-06", season: "s2", type: "momoke", category: "magic", name: "速速萌可", img: "img/s2/06_susu_v2.jpg" },
-    { id: "s2-m-07", season: "s2", type: "momoke", category: "magic", name: "寶寶萌可", img: "img/s2/07_baobao_v2.jpg" },
-    { id: "s2-m-08", season: "s2", type: "momoke", category: "magic", name: "睡睡萌可", img: "img/s2/08_shuishui_v2.jpg" },
-    { id: "s2-m-09", season: "s2", type: "momoke", category: "magic", name: "黏黏萌可", img: "img/s2/09_nianian_v2.jpg" },
-    { id: "s2-m-10", season: "s2", type: "momoke", category: "magic", name: "好奇萌可", img: "img/s2/10_haoqi_v2.jpg" },
-    { id: "s2-m-11", season: "s2", type: "momoke", category: "magic", name: "玩具萌可", img: "img/s2/11_wanju_v2.jpg" },
-    { id: "s2-m-12", season: "s2", type: "momoke", category: "magic", name: "變身萌可", img: "img/s2/12_bianshen_v2.jpg" },
-    { id: "s2-m-13", season: "s2", type: "momoke", category: "magic", name: "花花萌可", img: "img/s2/13_huahua_flower_v2.jpg" },
-    { id: "s2-m-14", season: "s2", type: "momoke", category: "magic", name: "玩玩萌可／樂樂萌可", img: "img/s2/14_wanwan_lele.jpg" },
-    { id: "s2-m-15", season: "s2", type: "momoke", category: "magic", name: "嘆氣萌可", img: "img/s2/15_tanqi_v2.jpg" },
-    { id: "s2-m-16", season: "s2", type: "momoke", category: "magic", name: "聰明萌可", img: "img/s2/16_congming_v2.jpg" },
-    { id: "s2-m-17", season: "s2", type: "momoke", category: "magic", name: "冰冰萌可", img: "img/s2/17_bingbing_v2.jpg" },
-    { id: "s2-m-18", season: "s2", type: "momoke", category: "magic", name: "電電萌可", img: "img/s2/18_diandian_v2.jpg" },
-    { id: "s2-m-19", season: "s2", type: "momoke", category: "magic", name: "孤獨萌可", img: "img/s2/19_gudu_v2.jpg" },
-    { id: "s2-m-20", season: "s2", type: "momoke", category: "villain", name: "妖妖萌可", img: "img/s2/20_yaoyao_v2.jpg" },
+    // ---- 第二季：20 萌可（圖片來自 img/s2/，名稱與次序來自 /workspace/momoke/images/s2/manifest.json；簡介為書面語 blurb）----
+    { id: "s2-m-01", season: "s2", type: "momoke", category: "royal", name: "幸福萌可", img: "img/s2/01_xingfu_v2.jpg", blurb: "樂觀又天然呆，拿著泡泡槍，句尾「幸福」！" },
+    { id: "s2-m-02", season: "s2", type: "momoke", category: "magic", name: "冷冷萌可", img: "img/s2/02_lengleng_v2.jpg", blurb: "很冷靜，手拿冰棍，能讓周圍變冷。" },
+    { id: "s2-m-03", season: "s2", type: "momoke", category: "magic", name: "畫畫萌可", img: "img/s2/03_huahua_paint_v2.jpg", blurb: "最愛畫畫，手拿畫筆。" },
+    { id: "s2-m-04", season: "s2", type: "momoke", category: "magic", name: "重重萌可", img: "img/s2/04_zhongzhong_v2.jpg", blurb: "最愛健身，提著啞鈴。" },
+    { id: "s2-m-05", season: "s2", type: "momoke", category: "magic", name: "倒倒萌可", img: "img/s2/05_daodao_v2.jpg", blurb: "喜歡倒立看世界，拿著磁鐵。" },
+    { id: "s2-m-06", season: "s2", type: "momoke", category: "magic", name: "速速萌可", img: "img/s2/06_susu_v2.jpg", blurb: "跑得很快，騎著滑板車。" },
+    { id: "s2-m-07", season: "s2", type: "momoke", category: "magic", name: "寶寶萌可", img: "img/s2/07_baobao_v2.jpg", blurb: "很有童心，拿著手搖鈴。" },
+    { id: "s2-m-08", season: "s2", type: "momoke", category: "magic", name: "睡睡萌可", img: "img/s2/08_shuishui_v2.jpg", blurb: "總想打瞌睡，拿著吸塵器。" },
+    { id: "s2-m-09", season: "s2", type: "momoke", category: "magic", name: "黏黏萌可", img: "img/s2/09_nianian_v2.jpg", blurb: "很黏人，拿著固體膠棒。" },
+    { id: "s2-m-10", season: "s2", type: "momoke", category: "magic", name: "好奇萌可", img: "img/s2/10_haoqi_v2.jpg", blurb: "什麼都好奇，拿著放大鏡。" },
+    { id: "s2-m-11", season: "s2", type: "momoke", category: "magic", name: "玩具萌可", img: "img/s2/11_wanju_v2.jpg", blurb: "最愛玩具，玩著悠悠球。" },
+    { id: "s2-m-12", season: "s2", type: "momoke", category: "magic", name: "變身萌可", img: "img/s2/12_bianshen_v2.jpg", blurb: "會變裝，戴著舞會面具，句尾「變變變」。" },
+    { id: "s2-m-13", season: "s2", type: "momoke", category: "magic", name: "花花萌可", img: "img/s2/13_huahua_flower_v2.jpg", blurb: "喜歡花朵，拿著玫瑰花。" },
+    { id: "s2-m-14", season: "s2", type: "momoke", category: "magic", name: "玩玩萌可／樂樂萌可", img: "img/s2/14_wanwan_lele.jpg", blurb: "大的玩玩拿遊戲機，小的樂樂抱奶瓶。" },
+    { id: "s2-m-15", season: "s2", type: "momoke", category: "magic", name: "嘆氣萌可", img: "img/s2/15_tanqi_v2.jpg", blurb: "容易嘆氣，拿著喇叭。" },
+    { id: "s2-m-16", season: "s2", type: "momoke", category: "magic", name: "聰明萌可", img: "img/s2/16_congming_v2.jpg", blurb: "很愛上學，拿著鉛筆和書本。" },
+    { id: "s2-m-17", season: "s2", type: "momoke", category: "magic", name: "冰冰萌可", img: "img/s2/17_bingbing_v2.jpg", blurb: "很冰冷，拿著冰淇淋。" },
+    { id: "s2-m-18", season: "s2", type: "momoke", category: "magic", name: "電電萌可", img: "img/s2/18_diandian_v2.jpg", blurb: "很興奮，拿著閃電權杖。" },
+    { id: "s2-m-19", season: "s2", type: "momoke", category: "magic", name: "孤獨萌可", img: "img/s2/19_gudu_v2.jpg", blurb: "喜歡獨處，拿著釣魚竿。" },
+    { id: "s2-m-20", season: "s2", type: "momoke", category: "villain", name: "妖妖萌可", img: "img/s2/20_yaoyao_v2.jpg", blurb: "第二季最終反派，拿著惡魔三叉戟，句尾「昂昂」！" },
 
     // ---- 第二季：52 張劇照（每集 a、b 兩張）：name / blurb / intro 取自 s2_stills/blurbs.json；跟第一季一樣，App 只顯示「第 N 集」----
     { id: "s2-still-ep01a", season: "s2", type: "still", ep: 1, name: "粉紅髮女孩與萌可", img: "img/s2_stills/ep01_a.jpg", blurb: "第1集〈最喜歡搗亂了〉", intro: "粉紅髮的女孩肩上站著一隻粉紅色的小萌可，身處柔和的粉紅色房間裡。" },
