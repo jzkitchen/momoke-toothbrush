@@ -447,14 +447,14 @@ console.log("✓ 日子與時段");
   checks += 6;
   console.log("✓ 預備倒數：時段邊緣以倒數開始 / 真正開始中較有利的時間判斷，不改動資料；預備時間設定預設開啟");
 }
-// ---- 第二季（72 張 = 20 萌可 + 52 劇照，沒有公主）----
+// ---- 第二季（74 張 = 20 萌可 + 2 公主 + 52 劇照）----
 {
   const s2 = DATA.items.filter((i) => i.season === "s2");
   const S2 = L.season("s2");
-  const S2TOTAL = 72, S2FINAL = "s2-m-20";
-  eq(s2.length, S2TOTAL, "第二季 72 張"); eq(S2.total, S2TOTAL); ok(S2.open === true, "第二季 open");
+  const S2TOTAL = 74, S2FINAL = "s2-m-20";
+  eq(s2.length, S2TOTAL, "第二季 74 張"); eq(S2.total, S2TOTAL); ok(S2.open === true, "第二季 open");
   eq(s2.filter((i) => i.type === "momoke").length, 20); eq(s2.filter((i) => i.type === "still").length, 52);
-  eq(s2.filter((i) => i.type === "princess").length, 0, "第二季沒有公主");
+  eq(s2.filter((i) => i.type === "princess").length, 2, "第二季 2 張公主");
   eq(new Set(DATA.items.map((i) => i.id)).size, DATA.items.length, "全部 id 不重複");
   // 名稱 / 次序 / 分類來自 manifest.json
   const MAN = "/workspace/momoke/images/s2/manifest.json";
@@ -463,6 +463,7 @@ console.log("✓ 日子與時段");
   assert.deepStrictEqual(ms.map((m) => m.name), names, "第二季萌可名稱與次序");
   assert.deepStrictEqual(ms.map((m) => m.id), names.map((_, i) => "s2-m-" + String(i + 1).padStart(2, "0")));
   eq(ms[0].category, "royal"); eq(ms[19].category, "villain"); eq(ms.filter((m) => m.category === "magic").length, 18);
+  eq(ms[0].princess, "s2-p-01", "幸福萌可 → 陽光公主");
   const S2_BLURBS = [
     "樂觀又天然呆，拿著泡泡槍，句尾「幸福」！",
     "很冷靜，手拿冰棍，能讓周圍變冷。",
@@ -490,6 +491,13 @@ console.log("✓ 日子與時段");
     const man = JSON.parse(fs.readFileSync(MAN, "utf8"));
     man.forEach((x, i) => { eq(ms[i].name, x.name, "name = manifest " + x.file); eq(path.basename(ms[i].img), x.file); });
   }
+  const ps = s2.filter((i) => i.type === "princess");
+  eq(ps[0].id, "s2-p-01"); eq(ps[0].name, "陽光公主"); eq(ps[0].royal, "s2-m-01");
+  eq(ps[0].blurb, "樂美和幸福萌可一起變身成陽光公主！");
+  eq(ps[1].id, "s2-p-02"); eq(ps[1].name, "神聖公主"); ok(!ps[1].royal, "神聖公主無單一 royal");
+  eq(ps[1].blurb, "樂美和六隻皇室萌可一起變身成神聖公主！");
+  eq(path.basename(ps[0].img), "01_yangguang.jpg"); eq(path.basename(ps[1].img), "02_shensheng.jpg");
+  ok(/^img\/s2_princess\//.test(ps[0].img) && /^img\/s2_princess\//.test(ps[1].img));
   const st2s = s2.filter((i) => i.type === "still");
   const efiles = []; for (let e = 1; e <= 26; e++) for (const ab of ["a", "b"]) efiles.push(`ep${String(e).padStart(2, "0")}_${ab}.jpg`);
   assert.deepStrictEqual(st2s.map((x) => path.basename(x.img)), efiles, "第二季劇照次序：集數再 a/b");
@@ -498,7 +506,7 @@ console.log("✓ 日子與時段");
   eq(S2.first.length, 1); eq(S2.first[0], "s2-m-01"); eq(S2.finalItem, S2FINAL);
   eq(S2.transform.from, "s1-m-24"); eq(S2.transform.to, "s2-m-01"); eq(S2.music, null, "第二季音樂維持 null");
 
-  // 抽卡：由第 2 張起，72 張不重複，妖妖最後，沒有公主
+  // 抽卡：幸福第 1、陽光第 2、神聖第 73、妖妖第 74；中間萌可+劇照平均混合、不重複
   const baseS1 = () => {
     const st = L.emptyState();
     s1.forEach((it) => st.collected.push({ id: it.id, t: 0, d: "2026-10-01", s: null }));
@@ -513,55 +521,58 @@ console.log("✓ 日子與時段");
     const seq = [];
     let id;
     seq.push("s2-m-01");
-    while ((id = L.drawNext(st, R))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); st.pending = null; ok(seq.length <= S2TOTAL, "不可多於 72 張"); }
-    eq(seq.length, S2TOTAL, "共 72 張"); eq(new Set(seq).size, S2TOTAL, "72 張不重複");
-    eq(seq[0], "s2-m-01", "第 1 張幸福萌可"); eq(seq[S2TOTAL - 1], S2FINAL, "第 72 張妖妖萌可");
-    ok(seq.every((x) => L.byId[x].season === "s2" && L.byId[x].type !== "princess"), "只有第二季、沒有公主");
+    while ((id = L.drawNext(st, R))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); st.pending = null; ok(seq.length <= S2TOTAL, "不可多於 74 張"); }
+    eq(seq.length, S2TOTAL, "共 74 張"); eq(new Set(seq).size, S2TOTAL, "74 張不重複");
+    eq(seq[0], "s2-m-01", "第 1 張幸福萌可"); eq(seq[1], "s2-p-01", "第 2 張陽光公主");
+    eq(seq[S2TOTAL - 2], "s2-p-02", "第 73 張神聖公主"); eq(seq[S2TOTAL - 1], S2FINAL, "第 74 張妖妖萌可");
+    ok(seq.every((x) => L.byId[x].season === "s2"), "只有第二季");
+    eq(seq.filter((x) => L.byId[x].type === "princess").length, 2, "剛好 2 張公主");
+    for (let i = 2; i < S2TOTAL - 2; i++) ok(L.byId[seq[i]].type !== "princess" && seq[i] !== S2FINAL, "中段無公主無妖妖 @" + i);
     eq(L.currentSeasonId(st), null, "兩季集齊後 currentSeasonId = null");
-    if (run < 200) { // 萌可和劇照混在一起，不是萌可先劇照後
-      const firstStill = seq.findIndex((x) => L.byId[x].type === "still"), lastMom = seq.slice(0, S2TOTAL - 1).map((x) => L.byId[x].type).lastIndexOf("momoke");
+    if (run < 200) {
+      const mid = seq.slice(2, S2TOTAL - 2);
+      const firstStill = mid.findIndex((x) => L.byId[x].type === "still");
+      const lastMom = mid.map((x) => L.byId[x].type).lastIndexOf("momoke");
       ok(firstStill >= 0 && lastMom >= 0);
     }
   }
-  // 劇照和萌可平均混合：第 2–21 張裡劇照的平均比例約 52/71
+  // 劇照和萌可平均混合：陽光之後的抽卡池 = 18 魔方萌可 + 52 劇照 = 70
   { let stillsIn20 = 0, N = 2000;
     for (let run = 0; run < N; run++) {
       const R = rng(40000 + run), st = baseS1(); L.applyUnlocks(st, 0);
+      { const id = L.drawNext(st, R); eq(id, "s2-p-01"); st.collected.push({ id, t: 0, d: null, s: null }); }
       for (let k = 0; k < 20; k++) { const id = L.drawNext(st, R); st.collected.push({ id, t: 0, d: null, s: null }); if (L.byId[id].type === "still") stillsIn20++; }
     }
     const frac = stillsIn20 / (N * 20);
-    ok(Math.abs(frac - 52 / 71) < 0.05, "萌可和劇照平均混合 (" + frac.toFixed(3) + ")"); }
-  // 極端亂數也守規則（永遠 0 / 接近 1）
+    ok(Math.abs(frac - 52 / 70) < 0.05, "陽光之後萌可和劇照平均混合 (" + frac.toFixed(3) + ")"); }
   for (const fixed of [0, 0.999999, 0.5]) {
-    const st = baseS1(); L.applyUnlocks(st, 0); let id, n = 1;
-    while ((id = L.drawNext(st, () => fixed))) { st.collected.push({ id, t: 0, d: null, s: null }); n++; }
-    eq(n, S2TOTAL); eq(st.collected[st.collected.length - 1].id, S2FINAL);
+    const st = baseS1(); L.applyUnlocks(st, 0); let id, n = 1, seq = ["s2-m-01"];
+    while ((id = L.drawNext(st, () => fixed))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); n++; }
+    eq(n, S2TOTAL); eq(seq[1], "s2-p-01"); eq(seq[S2TOTAL - 2], "s2-p-02"); eq(seq[S2TOTAL - 1], S2FINAL);
   }
 
-  // 第二季未開放：第一季還差一張（80/81）→ currentSeasonId = s1，沒有第二季卡片，也不送幸福萌可
+  // 第二季未開放：第一季還差一張（80/81）
   { const st = baseS1(); st.collected = st.collected.filter((c) => c.id !== "s1-m-24"); eq(st.collected.length, 80);
     eq(L.currentSeasonId(st), "s1"); ok(!L.seasonUnlocked(st, "s2"), "80/81：第二季未開放");
     eq(L.applyUnlocks(st, 0).length, 0); eq(L.displaySeasonId(st), "s1");
     eq(L.drawNext(st, rng(1)), "s1-m-24", "最後一張是鬧鬧萌可"); }
 
-  // 完整流程：第一季最後一張（鬧鬧萌可）→ 第二季開放並直接送幸福萌可（1/72）→ 刷牙照常每次一張 → 集齊 72 → 兩季皆集齊
+  // 完整流程
   { const R = rng(2468), st = baseS1(); st.collected = st.collected.filter((c) => c.id !== "s1-m-24");
     eq(st.collected.length, 80);
     let res = L.recordBrush(st, T("2026-10-01T08:00"), T("2026-10-01T08:02"), R);
     eq(res.kind, "capture"); eq(res.item.id, "s1-m-24", "第 81 張鬧鬧萌可"); eq(res.number, 81); eq(res.seasonComplete, "s1");
     ok(res.unlock && res.unlock.item.id === "s2-m-01" && res.unlock.from.id === "s1-m-24", "同時送出幸福萌可");
-    eq(L.collectedIn(st, "s1").length, 81, "第一季仍是 81 張，鬧鬧萌可還在"); eq(L.collectedIn(st, "s2").length, 1, "第二季 1/72");
+    eq(L.collectedIn(st, "s1").length, 81, "第一季仍是 81 張，鬧鬧萌可還在"); eq(L.collectedIn(st, "s2").length, 1, "第二季 1/74");
     ok(L.collectedSet(st)["s1-m-24"] && L.collectedSet(st)["s2-m-01"]);
     eq(st.days["2026-10-01"].mc, "s1-m-24", "日曆記的是刷牙得到的鬧鬧萌可（幸福萌可是禮物，不佔名額）");
     eq(L.cardsOnDay(st.days["2026-10-01"]), 1);
     eq(L.pendingNews(st), "s2"); eq(L.displaySeasonId(st), "s2"); eq(L.currentSeasonId(st), "s2");
-    // 存檔 / 讀取後通知還在，顯示後清除
     const re = L.normalizeState(JSON.parse(JSON.stringify(st))); eq(re.news[0], "s2"); eq(re.collected.length, 82);
     L.clearNews(st, "s2"); eq(L.pendingNews(st), null); ok(!("news" in st), "清除後沒有 news 鍵");
     eq(L.applyUnlocks(st, 0).length, 0, "不會再次送出或再次通知"); eq(L.pendingNews(st), null);
-    // 同一個晚上時段：已得過卡不再得卡；第二天照常
     eq(L.recordBrush(st, T("2026-10-01T09:00"), T("2026-10-01T09:02"), R).kind, "again");
-    const pl = L.planBrush(st, T("2026-10-01T20:00"), R); ok(pl.earn && L.byId[pl.id].season === "s2" && pl.id !== "s2-m-01", "下一張是第二季的卡");
+    const pl = L.planBrush(st, T("2026-10-01T20:00"), R); ok(pl.earn && pl.id === "s2-p-01", "下一張是陽光公主");
     eq(L.planBrush(st, T("2026-10-01T20:01"), rng(5)).id, pl.id, "中途停止沿用同一張");
     let d = new Date(2026, 9, 1), n = 0;
     while (L.collectedIn(st, "s2").length < S2TOTAL && n++ < 200) {
@@ -570,12 +581,11 @@ console.log("✓ 日子與時段");
       d.setDate(d.getDate() + 1);
     }
     eq(L.collectedIn(st, "s2").length, S2TOTAL); eq(st.collected.length, TOTAL + S2TOTAL);
-    eq(new Set(st.collected.map((c) => c.id)).size, TOTAL + S2TOTAL, "兩季共 153 張不重複");
-    eq(st.collected[st.collected.length - 1].id, S2FINAL, "最後一張妖妖萌可");
+    eq(new Set(st.collected.map((c) => c.id)).size, TOTAL + S2TOTAL, "兩季共 155 張不重複");
+    const s2ids = st.collected.filter((c) => L.byId[c.id].season === "s2").map((c) => c.id);
+    eq(s2ids[0], "s2-m-01"); eq(s2ids[1], "s2-p-01"); eq(s2ids[S2TOTAL - 2], "s2-p-02"); eq(s2ids[S2TOTAL - 1], S2FINAL);
     ok(L.isSeasonComplete(st, "s2") && L.isSeasonComplete(st, "s1"));
     eq(L.currentSeasonId(st), null); eq(L.displaySeasonId(st), "s2");
-    // 最後一張完成時回報 seasonComplete: s2
-    // （上面迴圈最後一次 capture 的結果）
     const k2 = L.ymd(d);
     const pc = L.planBrush(st, T(k2 + "T08:00")); ok(!pc.earn && pc.reason === "complete", "兩季集齊後 planBrush = complete");
     eq(L.recordBrush(st, T(k2 + "T08:00"), T(k2 + "T08:02")).kind, "all-done", "不再抽卡，不當機");
@@ -585,11 +595,20 @@ console.log("✓ 日子與時段");
   }
   // 第二季最後一張的 seasonComplete
   { const st = baseS1(); L.applyUnlocks(st, 0); st.collected.push(...s2.filter((i) => i.id !== S2FINAL && i.id !== "s2-m-01").map((i) => ({ id: i.id, t: 0, d: null, s: null })));
-    eq(L.collectedIn(st, "s2").length, 71);
+    eq(L.collectedIn(st, "s2").length, 73);
     const r = L.recordBrush(st, T("2026-12-01T08:00"), T("2026-12-01T08:02"), rng(3));
-    eq(r.item.id, S2FINAL); eq(r.number, 72); eq(r.seasonComplete, "s2"); eq(r.unlock, null); }
+    eq(r.item.id, S2FINAL); eq(r.number, 74); eq(r.seasonComplete, "s2"); eq(r.unlock, null); }
 
-  // 舊資料：v9 的進度（第二季尚未開放時存下的各種狀態）完全不變，也不需要轉換
+  // 舊進度加項：已集齊舊版 72 張（含妖妖、無公主）→ 補抽陽光、神聖
+  { const st = baseS1(); L.applyUnlocks(st, 0);
+    s2.filter((i) => i.type !== "princess").forEach((i) => { if (i.id !== "s2-m-01") st.collected.push({ id: i.id, t: 0, d: null, s: null }); });
+    eq(L.collectedIn(st, "s2").length, 72);
+    ok(!L.isSeasonComplete(st, "s2"), "缺 2 張公主 → 未集齊");
+    const a = L.drawNext(st, rng(1)); eq(a, "s2-p-01", "補陽光公主"); st.collected.push({ id: a, t: 0, d: null, s: null });
+    const b = L.drawNext(st, rng(2)); eq(b, "s2-p-02", "補神聖公主"); st.collected.push({ id: b, t: 0, d: null, s: null });
+    eq(L.drawNext(st, rng(3)), null); ok(L.isSeasonComplete(st, "s2")); }
+
+  // 舊資料：v9 的進度完全不變
   { const v9 = { schema: 2, days: { "2026-09-26": { m: 1, e: 2, mc: "s1-m-01", ec: "s1-p-01", x: 0 } },
       collected: [{ id: "s1-m-01", t: 1, d: "2026-09-26", s: "m" }, { id: "s1-p-01", t: 2, d: "2026-09-26", s: "e" }, { id: "s1-still-ep03a", t: 3, d: "2026-09-27", s: null }], pending: { id: "s1-m-02", n: 3 } };
     const out = L.normalizeState(JSON.parse(JSON.stringify(v9)));
@@ -598,21 +617,18 @@ console.log("✓ 日子與時段");
     assert.deepStrictEqual(mg.state, v9); eq(mg.granted.length, 0);
     eq(L.applyUnlocks(out, 0).length, 0, "第一季未集齊 → 不送幸福萌可");
     assert.deepStrictEqual(out, v9, "applyUnlocks 沒有改動未集齊的資料");
-    // v9 時已集齊第一季（81 張，沒有第二季）：更新後第一次開啟 → 送出幸福萌可 + 通知一次，其餘不變
     const full = { schema: 2, days: {}, pending: null, collected: s1.map((it) => ({ id: it.id, t: 1, d: "2026-10-01", s: null })) };
     const f = L.normalizeState(JSON.parse(JSON.stringify(full)));
     eq(L.applyUnlocks(f, T("2026-10-02T09:00")).length, 1);
     assert.deepStrictEqual(f.collected.slice(0, 81), full.collected, "第一季 81 張原封不動"); eq(f.collected[81].id, "s2-m-01"); eq(f.news[0], "s2");
-    // 匯出 / 匯入：含第二季的資料來回不變；舊備份（沒有 news）照常
     const back = L.migrateState(JSON.parse(JSON.stringify({ app: "x", state: f }).replace(/^/, "")).state, 0, rng(1));
     assert.deepStrictEqual(back.state, f, "含第二季卡片和通知的備份來回不變");
     const noNews = JSON.parse(JSON.stringify(f)); delete noNews.news; assert.deepStrictEqual(L.normalizeState(noNews).collected, f.collected);
   }
-  // 季度資料與家長設定、音樂的其他部分沒有被改動
   eq(L.songFor(L.emptyState()).src, "audio/s1_op.m4a");
   eq(L.seasonUnlocked(L.emptyState(), "s1"), true); eq(L.seasonUnlocked(L.emptyState(), "s2"), false);
   eq(L.displaySeasonId(L.emptyState()), "s1");
-  console.log("✓ 第二季：72 張（20 萌可 + 52 劇照，沒有公主）、幸福萌可第 1 張、妖妖萌可最後、第一季集齊後開放並直接送幸福萌可、兩季集齊後不再抽卡、舊進度不變");
+  console.log("✓ 第二季：74 張（20 萌可 + 2 公主 + 52 劇照）、幸福第 1、陽光第 2、神聖第 73、妖妖最後、第一季集齊後開放並直接送幸福萌可、舊 72 張進度可補公主、兩季集齊後不再抽卡");
 }
 
 // App 版本：主頁底部的小字（data.js 的 version）必須和 sw.js 的 VERSION 相同

@@ -11,8 +11,9 @@
  *     collected: [ { id, t, d, s } ],                 按得到的次序；s："m" | "e" | null（舊資料 / 補發）
  *     pending: { id, n } | null,                      已決定但未完成的下一張卡（n = 決定時已收集的張數）
  *     news: ["s2"] }                                  （可省略）還沒有顯示過的「新一季開始」通知（季度 id）；顯示後移除
- * 第二季（72 張）：第一季集齊後開放；鬧鬧萌可變成幸福萌可 → s2-m-01 直接送出（applyUnlocks，不佔刷牙時段），
- * 之後照樣每次刷牙得一張，妖妖萌可（s2-m-20）最後。進度資料格式仍是 schema 2，舊資料不用轉換（news 沒有就當作沒有）。
+ * 第二季（74 張）：第一季集齊後開放；鬧鬧萌可變成幸福萌可 → s2-m-01 直接送出（applyUnlocks，不佔刷牙時段），
+ * 下一次刷牙出陽光公主（皇室→公主）；神聖公主在其餘非最終卡集齊後出；妖妖萌可（s2-m-20）最後。
+ * 進度資料格式仍是 schema 2，舊資料不用轉換（news 沒有就當作沒有；新公主卡為加項）。
  * 舊格式（schema 1）：days[k] = { m, e, cap, x }，由 migrateState() 轉換。
  */
 (function (root, factory) {
@@ -211,8 +212,42 @@
   }
 
   /**
-   * 其他季度（第二季）的抽卡：first 清單的卡片先（第 1 張 s2-m-01 由 applyUnlocks 直接送出），
-   * 其餘從未收集的卡片中平均抽（萌可和劇照混在一起，不重複），finalItem（妖妖萌可）一定是最後一張。
+   * 第二季抽卡（對齊第一季的皇室→公主，並保留妖妖最後）：
+   *  1) first（s2-m-01 幸福萌可；通常由 applyUnlocks 直接送出）
+   *  2) 皇室萌可已收集但公主未收集 → 公主（幸福 → 陽光公主）
+   *  3) 其餘從未收集且非公主、非妖妖的卡（萌可 + 劇照）平均抽；
+   *     神聖公主沒有單一皇室連結，不進普通池，留到只剩她時再出（妖妖前最後一張）
+   *  4) finalItem 妖妖萌可（第 74 張）
+   */
+  function drawNextS2(collectedIds, rng) {
+    var S2 = season("s2");
+    var have = {};
+    collectedIds.forEach(function (id) { have[id] = true; });
+    var items = seasonItems("s2");
+    var finalId = S2.finalItem;
+    var nonFinal = items.filter(function (it) { return it.id !== finalId; });
+    var uncollectedNonFinal = nonFinal.filter(function (it) { return !have[it.id]; });
+
+    if (!uncollectedNonFinal.length) return have[finalId] ? null : finalId;
+
+    var s2Collected = collectedIds.filter(function (id) { return byId[id] && byId[id].season === "s2"; });
+    var n = s2Collected.length + 1;
+    if (S2.first && n <= S2.first.length && !have[S2.first[n - 1]]) return S2.first[n - 1];
+
+    // 皇室萌可已收集但公主未收集 → 公主（從最近收集的開始找）
+    for (var i = s2Collected.length - 1; i >= 0; i--) {
+      var it = byId[s2Collected[i]];
+      if (it && it.category === "royal" && it.princess && !have[it.princess]) return it.princess;
+    }
+
+    // 普通池：不含公主（陽光已由上面送出；神聖留到最後）
+    var pool = uncollectedNonFinal.filter(function (it) { return it.type !== "princess"; });
+    if (!pool.length) return uncollectedNonFinal[0].id; // 只剩神聖公主
+    return pick(pool, rng).id;
+  }
+
+  /**
+   * 其他尚未實作特別規則的季度：first → 其餘平均抽 → finalItem 最後。
    */
   function drawNextGeneric(sid, collectedIds, rng) {
     var s = season(sid);
@@ -229,7 +264,9 @@
     var sid = currentSeasonId(state);
     if (!sid) return null;
     var ids = state.collected.map(function (c) { return c.id; });
-    return sid === "s1" ? drawNextS1(ids, rng) : drawNextGeneric(sid, ids, rng);
+    if (sid === "s1") return drawNextS1(ids, rng);
+    if (sid === "s2") return drawNextS2(ids, rng);
+    return drawNextGeneric(sid, ids, rng);
   }
 
   function getDay(state, key) {
@@ -456,7 +493,7 @@
     season: season, seasonItems: seasonItems, emptyState: emptyState, normalizeState: normalizeState,
     collectedSet: collectedSet, collectedIn: collectedIn, currentSeasonId: currentSeasonId,
     isSeasonComplete: isSeasonComplete, seasonUnlocked: seasonUnlocked, displaySeasonId: displaySeasonId,
-    applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNext: drawNext,
+    applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNextS2: drawNextS2, drawNext: drawNext,
     getDay: getDay, validPending: validPending, ensurePending: ensurePending, planBrush: planBrush,
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,

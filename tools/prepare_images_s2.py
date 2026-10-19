@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Season 2 images (added 2026-10-01): 20 萌可 (square, ~600px) + 52 stills (fit inside 800x450, aspect kept).
+"""Season 2 images: 20 萌可 (square, ~600px) + 2 公主 (square, ~600px) + 52 stills (fit inside 800x450, aspect kept).
 Only resizes, re-encodes and pads to square with white. No other edits.
   img/s2/<file from /workspace/momoke/images/s2/manifest.json>          e.g. img/s2/01_xingfu_v2.jpg
+  img/s2_princess/<file from /workspace/momoke/images/s2_princess/manifest.json>
   img/s2_stills/epNN_a.jpg ... (from /workspace/momoke/images/s2_stills/manifest.json)
 Usage: /workspace/.pwvenv/bin/python tools/prepare_images_s2.py   (needs Pillow)
 """
@@ -10,6 +11,7 @@ from PIL import Image
 
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_M = "/workspace/momoke/images/s2"
+SRC_P = "/workspace/momoke/images/s2_princess"
 SRC_S = "/workspace/momoke/images/s2_stills"
 LONG = 600
 STILL_W, STILL_H = 800, 450
@@ -47,3 +49,12 @@ for m in json.load(open(os.path.join(SRC_S, "manifest.json"), encoding="utf-8"))
     out = os.path.join(ds, m["file"])
     im.save(out, "JPEG", quality=85, optimize=True, progressive=True)
     print(m["file"], im.size, os.path.getsize(out))
+
+dp = os.path.join(APP, "img", "s2_princess"); os.makedirs(dp, exist_ok=True)
+for m in json.load(open(os.path.join(SRC_P, "manifest.json"), encoding="utf-8"))["items"]:
+    im = pad_square(flatten_white(Image.open(os.path.join(SRC_P, m["file"]))))
+    if max(im.size) > LONG:
+        im = im.resize((LONG, LONG), Image.LANCZOS)
+    out = os.path.join(dp, m["file"])
+    im.save(out, "JPEG", quality=85, optimize=True, progressive=True)
+    print(m["order"], m["form"], m["file"], im.size, os.path.getsize(out))

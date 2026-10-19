@@ -2,7 +2,7 @@
  * 萌可刷牙 — 資料檔（唯一的卡片資料來源）
  * ---------------------------------------------------------------
  * 第一季共 81 張：24 萌可 + 5 公主 + 52 劇照。
- * 第二季共 72 張：20 萌可 + 52 劇照（沒有公主）。第一季集齊後開放，鬧鬧萌可變成幸福萌可（第二季第 1 張，直接送）。
+ * 第二季共 74 張：20 萌可 + 2 公主 + 52 劇照。第一季集齊後開放，鬧鬧萌可變成幸福萌可（第二季第 1 張，直接送）。
  * 要更換圖片：
  *   1. 把圖片放進 img/s1/、img/princess/ 或 img/stills/（檔名見 README.md）
  *   2. 在下面對應項目設定 img（例如 "img/stills/ep01_a.jpg"）；沒有圖片時為 null
@@ -26,7 +26,7 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v11",
+    version: "v12",
     seasons: [
       {
         id: "s1",
@@ -47,13 +47,14 @@
       {
         // 第二季：第一季集齊（81 張）後才開放（logic.js seasonUnlocked / applyUnlocks）。
         // transform：集齊第一季後，鬧鬧萌可變成幸福萌可 → 第二季第 1 張（s2-m-01）直接送給她（不用刷牙）。
-        // first：第 1 張固定；其餘平均抽；finalItem（妖妖萌可）放最後（第 72 張）。
+        // first：第 1 張固定；下一次刷牙依皇室→公主規則出陽光公主；神聖公主在其餘非最終卡集齊後（妖妖前最後）；
+        // finalItem（妖妖萌可）放最後（第 74 張）。抽卡見 logic.js drawNextS2。
         id: "s2",
         name: "第二季",
         open: true,
-        total: 72,
+        total: 74,
         first: ["s2-m-01"],
-        finalItem: "s2-m-20",            // 最後一張（第 72 張）：妖妖萌可
+        finalItem: "s2-m-20",            // 最後一張（第 74 張）：妖妖萌可
         completeTitle: "恭喜集齊第二季！",
         lockedText: "第二季 敬請期待",     // 第一季未集齊時，畫冊的第二季分頁顯示這句
         transform: { from: "s1-m-24", to: "s2-m-01" },
@@ -169,7 +170,7 @@
     { id: "s1-still-ep26b", season: "s1", type: "still", ep: 26, name: "樂美", img: "img/stills/ep26_b.jpg", blurb: "第26集〈戀戀萌可的箭〉", intro: "樂美在粉紅色房間裡露出笑容。" }, // s1_stills_v2/ep26_b.jpg
 
     // ---- 第二季：20 萌可（圖片來自 img/s2/，名稱與次序來自 /workspace/momoke/images/s2/manifest.json；簡介為書面語 blurb）----
-    { id: "s2-m-01", season: "s2", type: "momoke", category: "royal", name: "幸福萌可", img: "img/s2/01_xingfu_v2.jpg", blurb: "樂觀又天然呆，拿著泡泡槍，句尾「幸福」！" },
+    { id: "s2-m-01", season: "s2", type: "momoke", category: "royal", name: "幸福萌可", img: "img/s2/01_xingfu_v2.jpg", blurb: "樂觀又天然呆，拿著泡泡槍，句尾「幸福」！", princess: "s2-p-01" },
     { id: "s2-m-02", season: "s2", type: "momoke", category: "magic", name: "冷冷萌可", img: "img/s2/02_lengleng_v2.jpg", blurb: "很冷靜，手拿冰棍，能讓周圍變冷。" },
     { id: "s2-m-03", season: "s2", type: "momoke", category: "magic", name: "畫畫萌可", img: "img/s2/03_huahua_paint_v2.jpg", blurb: "最愛畫畫，手拿畫筆。" },
     { id: "s2-m-04", season: "s2", type: "momoke", category: "magic", name: "重重萌可", img: "img/s2/04_zhongzhong_v2.jpg", blurb: "最愛健身，提著啞鈴。" },
@@ -189,6 +190,10 @@
     { id: "s2-m-18", season: "s2", type: "momoke", category: "magic", name: "電電萌可", img: "img/s2/18_diandian_v2.jpg", blurb: "很興奮，拿著閃電權杖。" },
     { id: "s2-m-19", season: "s2", type: "momoke", category: "magic", name: "孤獨萌可", img: "img/s2/19_gudu_v2.jpg", blurb: "喜歡獨處，拿著釣魚竿。" },
     { id: "s2-m-20", season: "s2", type: "momoke", category: "villain", name: "妖妖萌可", img: "img/s2/20_yaoyao_v2.jpg", blurb: "第二季最終反派，拿著惡魔三叉戟，句尾「昂昂」！" },
+
+    // ---- 第二季：2 公主（圖片來自 img/s2_princess/；陽光對應幸福萌可；神聖為六隻皇室合體形態，無單一 royal）----
+    { id: "s2-p-01", season: "s2", type: "princess", name: "陽光公主", royal: "s2-m-01", img: "img/s2_princess/01_yangguang.jpg", blurb: "樂美和幸福萌可一起變身成陽光公主！" },
+    { id: "s2-p-02", season: "s2", type: "princess", name: "神聖公主", img: "img/s2_princess/02_shensheng.jpg", blurb: "樂美和六隻皇室萌可一起變身成神聖公主！" },
 
     // ---- 第二季：52 張劇照（每集 a、b 兩張）：name / blurb / intro 取自 s2_stills/blurbs.json；跟第一季一樣，App 只顯示「第 N 集」----
     { id: "s2-still-ep01a", season: "s2", type: "still", ep: 1, name: "粉紅髮女孩與萌可", img: "img/s2_stills/ep01_a.jpg", blurb: "第1集〈最喜歡搗亂了〉", intro: "粉紅髮的女孩肩上站著一隻粉紅色的小萌可，身處柔和的粉紅色房間裡。" },
