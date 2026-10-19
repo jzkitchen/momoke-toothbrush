@@ -794,27 +794,8 @@
     }
   }
 
-  // ---------- 結果 ----------
+  // ---------- 結果（只提醒洗臉；不顯示時段／已刷過等長說明） ----------
   function showResult(res) {
-    var title = "刷得真棒！", msg = "", emoji = "🎉";
-    switch (res.kind) {
-      case "again":
-        title = "刷得真乾淨！";
-        msg = res.slot === "morning" ? "今天早上已經得到卡片了，再刷一次也很棒！晚上五點後刷牙，可以再得到一張。"
-                                     : "今天晚上已經得到卡片了，再刷一次也很棒！明天早上再來吧！";
-        emoji = "✨"; break;
-      case "all-done":
-        title = res.slot === "morning" ? "早上完成！" : "晚上完成！";
-        msg = "你已經集齊所有卡片了，繼續保持好習慣！";
-        emoji = res.slot === "morning" ? "☀️" : "🌙"; break;
-      case "outside":
-        title = "刷得真棒！";
-        msg = "不過現在不是刷牙時段，這次不會得到卡片。早上四點至中午十二點、下午五點至凌晨四點刷牙，每次都能得到一張卡片。";
-        emoji = "👍"; break;
-    }
-    $("result-emoji").textContent = emoji;
-    $("result-title").textContent = title;
-    $("result-msg").textContent = msg;
     go("result");
   }
   $("btn-result-home").addEventListener("click", function () { go("home"); });

@@ -26,7 +26,7 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v13",
+    version: "v14",
     seasons: [
       {
         id: "s1",

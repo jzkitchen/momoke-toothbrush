@@ -226,11 +226,8 @@ img { -webkit-user-drag: none; }
 .ready-count.go { animation: goOut 1.5s ease forwards; }
 @keyframes goOut { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
 
-/* ---------- 結果 ---------- */
+/* ---------- 結果（只顯示洗臉提醒） ---------- */
 #screen-result { justify-content: center; text-align: center; }
-.result-emoji { font-size: 64px; animation: pop .6s ease; }
-.result-mascot img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 6px solid #fff; box-shadow: 0 8px 20px rgba(232,80,154,.3); animation: bob 2s ease-in-out infinite; }
-.result-title { font-size: 36px; font-weight: 900; color: var(--pink-d); margin: 16px 0 6px; }
 .result-msg { font-size: 23px; font-weight: 700; line-height: 1.55; margin: 6px 4px 24px; color: var(--ink); }
 
 .face-tip {
@@ -240,8 +237,10 @@ img { -webkit-user-drag: none; }
   font-size: 20px; font-weight: 900; line-height: 1.4;
   box-shadow: 0 4px 12px rgba(155,107,255,.18);
 }
+#screen-result .face-tip-primary {
+  margin: 0 8px 28px; padding: 16px 22px; font-size: 26px; border-radius: 28px;
+}
 #screen-capture .face-tip { margin: 4px 6px 14px; }
-#screen-result .result-msg { margin-bottom: 10px; }
 
 
 /* ---------- 捕捉動畫 ---------- */
