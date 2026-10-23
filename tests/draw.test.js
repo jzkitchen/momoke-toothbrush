@@ -368,40 +368,72 @@ console.log("✓ 日子與時段");
 
 // ---- 刷牙音樂、家長設定 ----
 {
-  const song = L.songFor(L.emptyState());
+  // 固定非萬聖節時刻，避免 10/31 當天跑測試時被 halloween 覆寫
+  const notHw = Date.UTC(2026, 9, 23, 4); // 2026-10-23 12:00 HKT
+  const song = L.songFor(L.emptyState(), "op", notHw);
   eq(song.src, "audio/s1_op.m4a"); eq(song.title, "捕萌少女"); eq(song.season, "s1");
   ok(fs.existsSync(path.join(__dirname, "..", song.src)), "音樂檔存在");
   // 集齊第一季（第二季未開放）仍播第一季的歌
   const all = L.emptyState();
   s1.forEach((it) => all.collected.push({ id: it.id, t: 0, d: null, s: null }));
-  eq(L.songFor(all).src, "audio/s1_op.m4a", "集齊後仍播第一季主題曲");
+  eq(L.songFor(all, "op", notHw).src, "audio/s1_op.m4a", "集齊後仍播第一季主題曲");
   eq(DATA.seasons.find((x) => x.id === "s2").music, null, "第二季未有歌");
   // 首頁音樂：純音樂版（music.home）；該季沒有 home 時用該季的 op；刷牙仍用 op
-  const hs = L.songFor(L.emptyState(), "home");
+  const hs = L.songFor(L.emptyState(), "home", notHw);
   eq(hs.src, "audio/s1_home.m4a"); eq(hs.kind, "home"); eq(hs.instrumental, true); eq(hs.title, "捕萌少女");
   ok(fs.existsSync(path.join(__dirname, "..", hs.src)), "首頁音樂檔存在");
-  eq(L.songFor(L.emptyState(), "op").src, "audio/s1_op.m4a"); eq(song.kind, "op"); eq(song.instrumental, false);
-  eq(L.songFor(all, "home").src, "audio/s1_home.m4a", "集齊後首頁仍播第一季純音樂版");
+  eq(L.songFor(L.emptyState(), "op", notHw).src, "audio/s1_op.m4a"); eq(song.kind, "op"); eq(song.instrumental, false);
+  eq(L.songFor(all, "home", notHw).src, "audio/s1_home.m4a", "集齊後首頁仍播第一季純音樂版");
   {
     const D2 = JSON.parse(JSON.stringify(DATA)); delete D2.seasons[0].music.home;
     const L2 = require("../logic.js")(D2);
-    eq(L2.songFor(L2.emptyState(), "home").src, "audio/s1_op.m4a", "沒有 home 時首頁用該季的 op");
-    eq(L2.songFor(L2.emptyState(), "home").kind, "op");
+    eq(L2.songFor(L2.emptyState(), "home", notHw).src, "audio/s1_op.m4a", "沒有 home 時首頁用該季的 op");
+    eq(L2.songFor(L2.emptyState(), "home", notHw).kind, "op");
     // 第二季開放而只有 op：首頁用第二季的 op；第二季沒有音樂：沿用第一季的 home
     const D3 = JSON.parse(JSON.stringify(DATA)); D3.seasons[1].open = true;
     D3.seasons[1].music = { op: { src: "audio/s2_op.m4a", title: "x" } };
     const L3 = require("../logic.js")(D3);
     const st3 = L3.emptyState(); s1.forEach((it) => st3.collected.push({ id: it.id, t: 0, d: null, s: null }));
-    eq(L3.songFor(st3, "home").src, "audio/s2_op.m4a", "第二季有 op 沒有 home：首頁用第二季的 op");
+    eq(L3.songFor(st3, "home", notHw).src, "audio/s2_op.m4a", "第二季有 op 沒有 home：首頁用第二季的 op");
     D3.seasons[1].music = null;
     const L4 = require("../logic.js")(D3);
-    eq(L4.songFor(st3, "home").src, "audio/s1_home.m4a", "第二季沒有音樂：沿用第一季的純音樂版");
-    eq(L4.songFor(st3).src, "audio/s1_op.m4a");
+    eq(L4.songFor(st3, "home", notHw).src, "audio/s1_home.m4a", "第二季沒有音樂：沿用第一季的純音樂版");
+    eq(L4.songFor(st3, "op", notHw).src, "audio/s1_op.m4a");
   }
   assert.deepStrictEqual(L.normalizeSettings(null), { music: true }, "預設開啟");
   assert.deepStrictEqual(L.normalizeSettings({ music: false }), { music: false });
   assert.deepStrictEqual(L.normalizeSettings({ music: "x" }), { music: true });
   console.log("✓ 刷牙音樂：每季可各有主題曲（第一季《捕萌少女》），家長設定預設開啟");
+}
+
+// ---- 萬聖節當日覆寫（Asia/Hong_Kong 10/31）----
+{
+  // 用 Intl 產生明確的 HK 時刻（UTC = HKT−8）
+  const hk = (y, mo, d, h = 12) => Date.UTC(y, mo - 1, d, h - 8);
+  ok(L.isHalloween(hk(2026, 10, 31, 0)), "10/31 00:00 HKT 是萬聖節");
+  ok(L.isHalloween(hk(2026, 10, 31, 23)), "10/31 23:00 HKT 是萬聖節");
+  ok(L.isHalloween(hk(2025, 10, 31, 12)), "任何年份 10/31 都是");
+  ok(!L.isHalloween(hk(2026, 10, 30, 23)), "10/30 23:00 HKT 不是");
+  ok(!L.isHalloween(hk(2026, 11, 1, 0)), "11/01 00:00 HKT 不是");
+  // 剛好跨日：10/30 23:59 HKT / 10/31 00:00 HKT
+  ok(!L.isHalloween(Date.UTC(2026, 9, 30, 15, 59)), "10/30 23:59 HKT = UTC 15:59 不是");
+  ok(L.isHalloween(Date.UTC(2026, 9, 30, 16, 0)), "10/31 00:00 HKT = UTC 16:00 是");
+  const hw = DATA.halloween;
+  ok(hw && hw.music && hw.music.src === "audio/halloween.m4a", "halloween.music 路徑");
+  ok(hw.mascot && hw.mascot.src === "img/halloween/album_cover.jpg", "halloween.mascot 路徑");
+  ok(fs.existsSync(path.join(__dirname, "..", hw.music.src)), "萬聖節音樂檔存在");
+  ok(fs.existsSync(path.join(__dirname, "..", hw.mascot.src)), "萬聖節封面存在");
+  const ts = hk(2026, 10, 31, 12);
+  eq(L.songFor(L.emptyState(), "home", ts).src, "audio/halloween.m4a", "萬聖節首頁歌");
+  eq(L.songFor(L.emptyState(), "op", ts).src, "audio/halloween.m4a", "萬聖節刷牙歌");
+  eq(L.songFor(L.emptyState(), null, ts).src, "audio/halloween.m4a", "萬聖節預設刷牙歌");
+  eq(L.songFor(L.emptyState(), "home", ts).season, "halloween");
+  eq(L.songFor(L.emptyState(), "home", ts).title, "萬聖節歌");
+  // 其他日子不變
+  const other = hk(2026, 10, 23, 12);
+  eq(L.songFor(L.emptyState(), "home", other).src, "audio/s1_home.m4a", "非萬聖節首頁仍是 MR");
+  eq(L.songFor(L.emptyState(), "op", other).src, "audio/s1_op.m4a", "非萬聖節刷牙仍是人聲");
+  console.log("✓ 萬聖節：isHalloween（HK 10/31）覆寫首頁＋刷牙音樂；其他日子不變");
 }
 // ---- 預備倒數：時段邊緣取對小朋友較有利的時間、家長設定「預備時間」 ----
 {
@@ -590,7 +622,7 @@ console.log("✓ 日子與時段");
     const pc = L.planBrush(st, T(k2 + "T08:00")); ok(!pc.earn && pc.reason === "complete", "兩季集齊後 planBrush = complete");
     eq(L.recordBrush(st, T(k2 + "T08:00"), T(k2 + "T08:02")).kind, "all-done", "不再抽卡，不當機");
     eq(L.recordBrush(st, T(k2 + "T14:00"), T(k2 + "T14:02")).kind, "outside");
-    ok(L.songFor(st) && L.songFor(st).src === "audio/s1_op.m4a" && L.songFor(st, "home").src === "audio/s1_home.m4a", "第二季沒有音樂：沿用第一季的歌");
+    ok(L.songFor(st, "op", Date.UTC(2026,9,23,4)) && L.songFor(st, "op", Date.UTC(2026,9,23,4)).src === "audio/s1_op.m4a" && L.songFor(st, "home", Date.UTC(2026,9,23,4)).src === "audio/s1_home.m4a", "第二季沒有音樂：沿用第一季的歌");
     eq(L.normalizeState(JSON.parse(JSON.stringify(st))).collected.length, TOTAL + S2TOTAL);
   }
   // 第二季最後一張的 seasonComplete
@@ -625,7 +657,7 @@ console.log("✓ 日子與時段");
     assert.deepStrictEqual(back.state, f, "含第二季卡片和通知的備份來回不變");
     const noNews = JSON.parse(JSON.stringify(f)); delete noNews.news; assert.deepStrictEqual(L.normalizeState(noNews).collected, f.collected);
   }
-  eq(L.songFor(L.emptyState()).src, "audio/s1_op.m4a");
+  eq(L.songFor(L.emptyState(), "op", Date.UTC(2026,9,23,4)).src, "audio/s1_op.m4a");
   eq(L.seasonUnlocked(L.emptyState(), "s1"), true); eq(L.seasonUnlocked(L.emptyState(), "s2"), false);
   eq(L.displaySeasonId(L.emptyState()), "s1");
   console.log("✓ 第二季：74 張（20 萌可 + 2 公主 + 52 劇照）、幸福第 1、陽光第 2、神聖第 73、妖妖最後、第一季集齊後開放並直接送幸福萌可、舊 72 張進度可補公主、兩季集齊後不再抽卡");

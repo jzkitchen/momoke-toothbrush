@@ -135,6 +135,21 @@
     $("home-label").textContent = sid === "s1" ? "已收集" : seasonName(sid) + " 已收集";
     $("home-count").textContent = n + " / " + total;
     $("home-bar").style.width = (100 * n / total) + "%";
+    // 萬聖節當日：主頁吉祥物改官方專輯封面（維持既有圓形裁切 CSS）；其他日子還原愛心萌可
+    var mascotImg = document.querySelector("#screen-home .mascot img");
+    if (mascotImg) {
+      var hw = DATA.halloween, defSrc = "img/s1/01_aixin.jpg", defAlt = "愛心萌可";
+      if (L.isHalloween(ts) && hw && hw.mascot && hw.mascot.src) {
+        if (mascotImg.getAttribute("src") !== hw.mascot.src) {
+          mascotImg.src = hw.mascot.src;
+          mascotImg.alt = hw.mascot.alt || defAlt;
+        }
+      } else if (mascotImg.getAttribute("src") !== defSrc) {
+        mascotImg.src = defSrc;
+        mascotImg.alt = defAlt;
+      }
+    }
+    homeMusic();
   }
   // 時段狀態：得到卡片 / 已完成 / 現在可得 / 已錯過 / 未到時間
   function slotInfo(done, card, open, over, later, complete) {
@@ -186,7 +201,7 @@
   function homeMusicOn() { return settings.homeMusic !== false; }
   function homeMusic() {
     if (current !== "home" || !$("parent").hidden || brush.running) return;
-    if (homeMusicOn()) music.home(L.songFor(state, "home")); else music.stopHome();
+    if (homeMusicOn()) music.home(L.songFor(state, "home", now())); else music.stopHome();
   }
   // pointerdown 跟 touchend / click 都聽：iOS 以 touchend / click 作為可以播放聲音的手勢（重複呼叫不會重新播放）
   ["pointerdown", "touchend", "click"].forEach(function (ev) {
@@ -403,12 +418,14 @@
       /** 主頁背景音樂（循環、較小聲）；已在播放時不會重新開始。被瀏覽器拒絕時，下次輕觸主頁再試 */
       home: function (sg) {
         if (!sg) return;
-        if (mode === "home" && playing && el && !el.paused) return;
+        // 已在播主頁音樂且 src 相同：不重頭；src 變了（例如跨過萬聖節）則換歌並由頭播
+        if (mode === "home" && playing && el && !el.paused && el.getAttribute("src") === sg.src) return;
         song = sg;
         ensure(sg);
         resumeCtx();
         mode = "home";
         playing = true;
+        try { if (el) el.currentTime = 0; } catch (e) { /* ignore */ }
         apply(HOME, true);
         play();
       },
@@ -538,7 +555,7 @@
     brush.plan = countdown ? readyPreview() : null;
     if (countdown) setupStage(brush.plan);
     go("brush");
-    music.start(L.songFor(state));
+    music.start(L.songFor(state, null, now()));
     requestWake();
     if (countdown) {
       // 泡泡層在第一次畫面更新前就畫好（卡片不會先露出來）
@@ -1106,14 +1123,14 @@
     music.stopHome();
   }
   function renderMusicToggle() {
-    var on = settings.music, sg = L.songFor(state);
+    var on = settings.music, sg = L.songFor(state, null, now());
     $("toggle-music").setAttribute("aria-checked", on ? "true" : "false");
     $("toggle-music-text").textContent = on ? "開" : "關";
     $("music-note").textContent = on ? "刷牙時會播放主題曲" + (sg && sg.title ? "《" + sg.title + "》" : "") + "（預備倒數時已經開始），刷牙最後三秒慢慢變小聲。"
                                      : "刷牙時不播放音樂（仍有提示音）。";
   }
   function renderHomeMusicToggle() {
-    var on = homeMusicOn(), sg = L.songFor(state, "home");
+    var on = homeMusicOn(), sg = L.songFor(state, "home", now());
     $("toggle-home-music").setAttribute("aria-checked", on ? "true" : "false");
     $("toggle-home-music-text").textContent = on ? "開" : "關";
     var name = sg && sg.title ? "《" + sg.title + "》" + (sg.instrumental ? "純音樂版（沒有人聲）" : "") : "主題曲";

@@ -449,12 +449,40 @@
     return { state: out, granted: granted, notes: notes };
   }
 
+
+  /**
+   * 是否為萬聖節當日（每年 10 月 31 日）。
+   * 以 Asia/Hong_Kong 日曆判斷（與裝置本地時區無關），year-agnostic。
+   * ts 可省略（預設 Date.now()）。
+   */
+  function isHalloween(ts) {
+    var d = new Date(ts == null ? Date.now() : ts);
+    var parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Hong_Kong", month: "numeric", day: "numeric"
+    }).formatToParts(d);
+    var m = 0, day = 0;
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].type === "month") m = +parts[i].value;
+      else if (parts[i].type === "day") day = +parts[i].value;
+    }
+    return m === 10 && day === 31;
+  }
+
   /**
    * 音樂：目前收集中的季度的歌；該季未有歌（或已集齊）時，用最近一個已開放而有歌的季度。
    * kind = "op"（預設，刷牙音樂，有人聲）或 "home"（首頁音樂：該季的 music.home 純音樂版；該季沒有 home 時用該季的 op）。
+   * 萬聖節當日（isHalloween）：首頁與刷牙都改播 data.js halloween.music（其他日子不變）。
+   * 第三個參數 ts 可選（傳給 isHalloween；省略則用現在）。
    * 回傳 { src, type, title, duration, season, kind, instrumental } 或 null（kind 為實際使用的曲目）。
    */
-  function songFor(state, kind) {
+  function songFor(state, kind, ts) {
+    if (isHalloween(ts)) {
+      var hm = DATA.halloween && DATA.halloween.music;
+      if (hm && hm.src) {
+        return { src: hm.src, type: hm.type || "", title: hm.title || "", duration: hm.duration || 0,
+                 season: "halloween", kind: kind === "home" ? "home" : "op", instrumental: !!hm.instrumental };
+      }
+    }
     var sid = currentSeasonId(state);
     var best = null;
     for (var i = 0; i < DATA.seasons.length; i++) {
@@ -497,6 +525,6 @@
     getDay: getDay, validPending: validPending, ensurePending: ensurePending, planBrush: planBrush,
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,
-    songFor: songFor, normalizeSettings: normalizeSettings
+    isHalloween: isHalloween, songFor: songFor, normalizeSettings: normalizeSettings
   };
 });

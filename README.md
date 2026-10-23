@@ -20,6 +20,8 @@ img/s1/                 24 張萌可圖（由 /workspace/momoke/images/s1/ 縮�
 img/princess/           5 張公主圖（由 s1_princess/0X_*_gongzhu.png 轉成白底正方形 600×600 JPEG）
 audio/s1_op.m4a         第一季主題曲《捕萌少女》（刷牙音樂，有人聲，見下面「刷牙音樂」）
 audio/s1_home.m4a       第一季主題曲的官方純音樂版（首頁音樂，沒有人聲，見下面「首頁音樂」）
+audio/halloween.m4a     萬聖節歌（每年 10/31 首頁＋刷牙共用，見「萬聖節當日」）
+img/halloween/          萬聖節專輯封面 album_cover.jpg（主頁吉祥物覆寫）
 img/s2/                20 張第二季萌可（補成正方形、最長邊 600px、JPEG 85）
 img/s2_stills/          52 張第二季劇照（800×450 以內、JPEG 85）
 tools/prepare_images_s2.py 重新產生 img/s2 和 img/s2_stills 的腳本
@@ -39,7 +41,7 @@ screenshots/            測試截圖
 
 注意：iPhone 側邊靜音鍵開啟時，Web Audio 提示音可能不會發聲（這是 iOS 的行為）；刷牙音樂開啟時一般不受影響（見「刷牙音樂」）。
 
-## 規則（2026-09-27 起；目前 sw.js VERSION = "v12"）
+## 規則（2026-09-27 起；目前 sw.js VERSION = "v15"）
 
 - 「一天」由凌晨 04:00 至翌日 04:00（裝置本地時間）。
 - 早上時段 04:00–12:00；晚上時段 17:00–04:00。以**開始刷牙的時間**判斷時段和日子；
@@ -99,6 +101,15 @@ screenshots/            測試截圖
 - 進入畫冊、日曆或家長區時停止；回到主頁（刷牙完成或停止後、從畫冊 / 日曆返回、關閉家長區）時繼續播放（iOS 上可能要輕觸一下）。
 - 家長區「首頁音樂」：開 / 關（預設開啟），與「刷牙音樂」分開。設定存在 `momoke-brush-settings`：關閉時寫入 `"homeMusic": false`，
   開啟時不寫入（舊設定沒有這個鍵 = 開啟，不需要轉換）。
+
+
+## 萬聖節當日（v15）
+
+- **何時**：每年 **10 月 31 日**，以 `Asia/Hong_Kong` 日曆判斷（`logic.js` 的 `isHalloween(ts)`，與裝置時區無關；年份不限）。
+- **音樂**：當日首頁音樂與刷牙音樂都改播 `audio/halloween.m4a`（`data.js` 的 `halloween.music`；`songFor` 覆寫）。其他日子不變（首頁仍是第一季純音樂版、刷牙仍是人聲《捕萌少女》）。
+- **主頁吉祥物**：當日改顯示官方專輯封面 `img/halloween/album_cover.jpg`（1080×1080）；**維持既有圓形裁切 CSS**，不改成圓角方形。其他日子還原 `img/s1/01_aixin.jpg`。
+- 來源：音樂 YouTube `DQDYnYFtImk`／Apple Music 專輯；封面 Apple Music album `1590299467`（見 `/workspace/momoke/halloween/sources.json`）。
+- Service worker 會一併快取 `halloween` 的音樂與封面（即使一年只用一天，方便離線）。
 
 ## 聲音自動恢復（iOS 鎖機後沒有聲音）
 
@@ -210,7 +221,7 @@ App 已上線，裝置上可能已有舊資料。第一次開啟新版時自動�
    ```
    （`blurb` 可以按需要修改；**不要改 `id`**，已收集的紀錄靠 id 對應。）
 
-3. 打開 `sw.js`，把 `VERSION` 加一（目前是 `"v12"`，下次改成 `"v13"`，如此類推），並把 `data.js` 的 `version` 改成同一個數字（見「版本標籤」）。
+3. 打開 `sw.js`，把 `VERSION` 加一（目前是 `"v15"`，下次改成 `"v16"`，如此類推），並把 `data.js` 的 `version` 改成同一個數字（見「版本標籤」）。
 4. 重新上傳整個資料夾。iPhone 上的 App 會在下次開啟時下載新圖片（可能要關掉 App 再開一次）。
 
 ## 版本標籤（v9 新增）
