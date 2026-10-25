@@ -1,7 +1,7 @@
 /* 萌可刷牙 — Service Worker（離線快取）
  * 新增/更換任何檔案後，把 VERSION 加一（例如 "v10" → "v11"），並把 data.js 的 version 改成同一個數字，已安裝的 App 會在下次開啟時更新。
  */
-var VERSION = "v15"; // 必須和 data.js 的 version 相同（主頁底部顯示的版本；tests/draw.test.js 會檢查）
+var VERSION = "v16"; // 必須和 data.js 的 version 相同（主頁底部顯示的版本；tests/draw.test.js 會檢查）
 var CACHE = "momoke-brush-" + VERSION;
 importScripts("data.js");
 
@@ -25,7 +25,7 @@ var MUSIC = [];
 (self.MOMOKE_DATA.seasons || []).forEach(function (s) {
   ["op", "home"].forEach(function (k) { if (s.music && s.music[k] && s.music[k].src) MUSIC.push(s.music[k].src); });
 });
-// 萬聖節覆寫資源（每年只用一天，仍預先快取以便離線）
+// 萬聖節覆寫資源（每年 10/28–10/31，仍預先快取以便離線）
 var HW = self.MOMOKE_DATA.halloween;
 if (HW) {
   if (HW.music && HW.music.src) MUSIC.push(HW.music.src);

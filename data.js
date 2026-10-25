@@ -26,9 +26,9 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v15",
+    version: "v16",
 
-    // 萬聖節當日覆寫（每年 10 月 31 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isHalloween / songFor）：
+    // 萬聖節期間覆寫（每年 10 月 28–31 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isHalloween / songFor）：
     // 首頁吉祥物改官方專輯封面；首頁音樂與刷牙音樂都改播萬聖節歌。其他日子不變。
     halloween: {
       music: { src: "audio/halloween.m4a", type: "audio/mp4", title: "萬聖節歌", duration: 88.5 },

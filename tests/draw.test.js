@@ -368,7 +368,7 @@ console.log("✓ 日子與時段");
 
 // ---- 刷牙音樂、家長設定 ----
 {
-  // 固定非萬聖節時刻，避免 10/31 當天跑測試時被 halloween 覆寫
+  // 固定非萬聖節時刻（10/28–10/31 以外），避免期間跑測試時被 halloween 覆寫
   const notHw = Date.UTC(2026, 9, 23, 4); // 2026-10-23 12:00 HKT
   const song = L.songFor(L.emptyState(), "op", notHw);
   eq(song.src, "audio/s1_op.m4a"); eq(song.title, "捕萌少女"); eq(song.season, "s1");
@@ -406,34 +406,45 @@ console.log("✓ 日子與時段");
   console.log("✓ 刷牙音樂：每季可各有主題曲（第一季《捕萌少女》），家長設定預設開啟");
 }
 
-// ---- 萬聖節當日覆寫（Asia/Hong_Kong 10/31）----
+// ---- 萬聖節期間覆寫（Asia/Hong_Kong 10/28–10/31）----
 {
-  // 用 Intl 產生明確的 HK 時刻（UTC = HKT−8）
-  const hk = (y, mo, d, h = 12) => Date.UTC(y, mo - 1, d, h - 8);
-  ok(L.isHalloween(hk(2026, 10, 31, 0)), "10/31 00:00 HKT 是萬聖節");
-  ok(L.isHalloween(hk(2026, 10, 31, 23)), "10/31 23:00 HKT 是萬聖節");
-  ok(L.isHalloween(hk(2025, 10, 31, 12)), "任何年份 10/31 都是");
-  ok(!L.isHalloween(hk(2026, 10, 30, 23)), "10/30 23:00 HKT 不是");
+  // 用絕對 UTC 產生明確的 HK 時刻（HKT = UTC+8，無夏令時間；與測試機時區無關）
+  const hk = (y, mo, d, h = 12, min = 0) => Date.UTC(y, mo - 1, d, h - 8, min);
+  for (const day of [28, 29, 30, 31]) {
+    ok(L.isHalloween(hk(2026, 10, day, 0)), `10/${day} 00:00 HKT 是萬聖節`);
+    ok(L.isHalloween(hk(2026, 10, day, 12)), `10/${day} 12:00 HKT 是萬聖節`);
+    ok(L.isHalloween(hk(2026, 10, day, 23)), `10/${day} 23:00 HKT 是萬聖節`);
+  }
+  ok(L.isHalloween(hk(2025, 10, 28, 12)), "任何年份 10/28 都是");
+  ok(L.isHalloween(hk(2024, 10, 31, 23)), "任何年份 10/31 都是");
+  ok(!L.isHalloween(hk(2026, 10, 27, 0)), "10/27 00:00 HKT 不是");
+  ok(!L.isHalloween(hk(2026, 10, 27, 23)), "10/27 23:00 HKT 不是");
   ok(!L.isHalloween(hk(2026, 11, 1, 0)), "11/01 00:00 HKT 不是");
-  // 剛好跨日：10/30 23:59 HKT / 10/31 00:00 HKT
-  ok(!L.isHalloween(Date.UTC(2026, 9, 30, 15, 59)), "10/30 23:59 HKT = UTC 15:59 不是");
-  ok(L.isHalloween(Date.UTC(2026, 9, 30, 16, 0)), "10/31 00:00 HKT = UTC 16:00 是");
+  ok(!L.isHalloween(hk(2026, 9, 30, 12)), "9/30 不是");
+  // 剛好跨日：10/27 23:59 → 10/28 00:00；10/31 23:59 → 11/01 00:00
+  ok(!L.isHalloween(Date.UTC(2026, 9, 27, 15, 59)), "10/27 23:59 HKT = UTC 15:59 不是");
+  ok(L.isHalloween(Date.UTC(2026, 9, 27, 16, 0)), "10/28 00:00 HKT = UTC 16:00 是");
+  ok(L.isHalloween(Date.UTC(2026, 9, 31, 15, 59)), "10/31 23:59 HKT = UTC 15:59 是");
+  ok(!L.isHalloween(Date.UTC(2026, 9, 31, 16, 0)), "11/01 00:00 HKT = UTC 16:00 不是");
   const hw = DATA.halloween;
   ok(hw && hw.music && hw.music.src === "audio/halloween.m4a", "halloween.music 路徑");
   ok(hw.mascot && hw.mascot.src === "img/halloween/album_cover.jpg", "halloween.mascot 路徑");
   ok(fs.existsSync(path.join(__dirname, "..", hw.music.src)), "萬聖節音樂檔存在");
   ok(fs.existsSync(path.join(__dirname, "..", hw.mascot.src)), "萬聖節封面存在");
-  const ts = hk(2026, 10, 31, 12);
-  eq(L.songFor(L.emptyState(), "home", ts).src, "audio/halloween.m4a", "萬聖節首頁歌");
-  eq(L.songFor(L.emptyState(), "op", ts).src, "audio/halloween.m4a", "萬聖節刷牙歌");
-  eq(L.songFor(L.emptyState(), null, ts).src, "audio/halloween.m4a", "萬聖節預設刷牙歌");
-  eq(L.songFor(L.emptyState(), "home", ts).season, "halloween");
-  eq(L.songFor(L.emptyState(), "home", ts).title, "萬聖節歌");
-  // 其他日子不變
-  const other = hk(2026, 10, 23, 12);
-  eq(L.songFor(L.emptyState(), "home", other).src, "audio/s1_home.m4a", "非萬聖節首頁仍是 MR");
-  eq(L.songFor(L.emptyState(), "op", other).src, "audio/s1_op.m4a", "非萬聖節刷牙仍是人聲");
-  console.log("✓ 萬聖節：isHalloween（HK 10/31）覆寫首頁＋刷牙音樂；其他日子不變");
+  for (const day of [28, 31]) {
+    const ts = hk(2026, 10, day, 12);
+    eq(L.songFor(L.emptyState(), "home", ts).src, "audio/halloween.m4a", `10/${day} 首頁歌`);
+    eq(L.songFor(L.emptyState(), "op", ts).src, "audio/halloween.m4a", `10/${day} 刷牙歌`);
+    eq(L.songFor(L.emptyState(), null, ts).src, "audio/halloween.m4a", `10/${day} 預設刷牙歌`);
+    eq(L.songFor(L.emptyState(), "home", ts).season, "halloween");
+    eq(L.songFor(L.emptyState(), "home", ts).title, "萬聖節歌");
+  }
+  // 其他日子不變（窗口前一天、窗口後一天、以及固定的 10/23）
+  for (const other of [hk(2026, 10, 27, 23), hk(2026, 11, 1, 0), hk(2026, 10, 23, 12)]) {
+    eq(L.songFor(L.emptyState(), "home", other).src, "audio/s1_home.m4a", "非萬聖節首頁仍是純音樂版");
+    eq(L.songFor(L.emptyState(), "op", other).src, "audio/s1_op.m4a", "非萬聖節刷牙仍是人聲");
+  }
+  console.log("✓ 萬聖節：isHalloween（HK 10/28–10/31）覆寫首頁＋刷牙音樂；其他日子不變");
 }
 // ---- 預備倒數：時段邊緣取對小朋友較有利的時間、家長設定「預備時間」 ----
 {
