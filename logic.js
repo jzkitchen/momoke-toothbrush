@@ -451,7 +451,7 @@
 
 
   /**
-   * 是否為萬聖節當日（每年 10 月 31 日）。
+   * 是否為萬聖節期間（每年 10 月 28–31 日，含首尾）。
    * 以 Asia/Hong_Kong 日曆判斷（與裝置本地時區無關），year-agnostic。
    * ts 可省略（預設 Date.now()）。
    */
@@ -465,13 +465,13 @@
       if (parts[i].type === "month") m = +parts[i].value;
       else if (parts[i].type === "day") day = +parts[i].value;
     }
-    return m === 10 && day === 31;
+    return m === 10 && day >= 28 && day <= 31;
   }
 
   /**
    * 音樂：目前收集中的季度的歌；該季未有歌（或已集齊）時，用最近一個已開放而有歌的季度。
    * kind = "op"（預設，刷牙音樂，有人聲）或 "home"（首頁音樂：該季的 music.home 純音樂版；該季沒有 home 時用該季的 op）。
-   * 萬聖節當日（isHalloween）：首頁與刷牙都改播 data.js halloween.music（其他日子不變）。
+   * 萬聖節期間（isHalloween，HK 10/28–10/31）：首頁與刷牙都改播 data.js halloween.music（其他日子不變）。
    * 第三個參數 ts 可選（傳給 isHalloween；省略則用現在）。
    * 回傳 { src, type, title, duration, season, kind, instrumental } 或 null（kind 為實際使用的曲目）。
    */

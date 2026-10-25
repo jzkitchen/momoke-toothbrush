@@ -135,7 +135,7 @@
     $("home-label").textContent = sid === "s1" ? "已收集" : seasonName(sid) + " 已收集";
     $("home-count").textContent = n + " / " + total;
     $("home-bar").style.width = (100 * n / total) + "%";
-    // 萬聖節當日：主頁吉祥物改官方專輯封面（維持既有圓形裁切 CSS）；其他日子還原愛心萌可
+    // 萬聖節期間（HK 10/28–10/31）：主頁吉祥物改官方專輯封面（維持既有圓形裁切 CSS）；其他日子還原愛心萌可
     var mascotImg = document.querySelector("#screen-home .mascot img");
     if (mascotImg) {
       var hw = DATA.halloween, defSrc = "img/s1/01_aixin.jpg", defAlt = "愛心萌可";
