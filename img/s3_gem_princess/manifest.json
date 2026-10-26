@@ -1,0 +1,146 @@
+{
+ "app_season": 3,
+ "album_folder": "s3_gem_princess",
+ "title": "奇妙萌可 App 第3季公主卡（閃亮寶石變身）",
+ "mapping": "同 App S3＝閃亮寶石（百科第三季）",
+ "order_choice": "鑽石（愛心）→ 水晶（笑笑／Ruby）→ 翡翠（贊贊）→ 藍寶石（信信）",
+ "count": 4,
+ "generated": "2026-10-26 Asia/Hong_Kong",
+ "gallery_source": "https://catchteenieping.fandom.com/wiki/Princesses/Gallery/Season_2",
+ "baike": "https://baike.baidu.com/item/奇妙萌可/58125019",
+ "process_note": "Official fandom transparent renders; alpha-trim; white 1080×1080; fit ≤960px; never upscale; JPEG; no AI edit. Momoke raw reused from game_pack/images_s1_s6/s3 (already official fandom renders) then reprocessed.",
+ "items": [
+  {
+   "order": 1,
+   "form": "鑽石公主",
+   "baike_name": "钻石公主",
+   "en_name": "Princess Diaheart",
+   "royal": "愛心萌可",
+   "file": "01_zuanshi.jpg",
+   "raw": "Princess_Diaheart_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/9/98/Princess_Diaheart_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Princess_Diaheart_Render_1.png",
+   "baike_ref": "https://baike.baidu.com/item/奇妙萌可/58125019",
+   "status": "required",
+   "process": {
+    "source_size": [
+     889,
+     1925
+    ],
+    "trimmed_size": [
+     889,
+     1925
+    ],
+    "fitted_size": [
+     443,
+     960
+    ],
+    "scale": 0.4987,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). Confirmed File on Princesses/Gallery/Season 2 Renders → Princess Diaheart → Render 1."
+  },
+  {
+   "order": 2,
+   "form": "水晶公主",
+   "baike_name": "水晶公主",
+   "en_name": "Princess Ruby",
+   "royal": "笑笑萌可",
+   "file": "02_shuijing.jpg",
+   "raw": "Princess_Ruby_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/1/15/Princess_Ruby_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Princess_Ruby_Render_1.png",
+   "baike_ref": "https://baike.baidu.com/item/奇妙萌可/58125019",
+   "status": "required",
+   "process": {
+    "source_size": [
+     755,
+     1663
+    ],
+    "trimmed_size": [
+     755,
+     1663
+    ],
+    "fitted_size": [
+     436,
+     960
+    ],
+    "scale": 0.5773,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). Confirmed File on Princesses/Gallery/Season 2 Renders → Princess Ruby → Render 1. 百科「水晶公主」＝fandom Princess Ruby（勿譯 Crystal）。"
+  },
+  {
+   "order": 3,
+   "form": "翡翠公主",
+   "baike_name": "翡翠公主",
+   "en_name": "Princess Emerald",
+   "royal": "贊贊萌可",
+   "file": "03_feicui.jpg",
+   "raw": "Princess_Emerald_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/0/00/Princess_Emerald_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Princess_Emerald_Render_1.png",
+   "baike_ref": "https://baike.baidu.com/item/奇妙萌可/58125019",
+   "status": "required",
+   "process": {
+    "source_size": [
+     755,
+     1619
+    ],
+    "trimmed_size": [
+     755,
+     1615
+    ],
+    "fitted_size": [
+     449,
+     960
+    ],
+    "scale": 0.5944,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). Confirmed File on Princesses/Gallery/Season 2 Renders → Princess Emerald → Render 1."
+  },
+  {
+   "order": 4,
+   "form": "藍寶石公主",
+   "baike_name": "蓝宝石公主",
+   "en_name": "Princess Sapphire",
+   "royal": "信信萌可",
+   "file": "04_lanshiba.jpg",
+   "raw": "Princess_Sapphire_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/c/cb/Princess_Sapphire_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Princess_Sapphire_Render_1.png",
+   "baike_ref": "https://baike.baidu.com/item/奇妙萌可/58125019",
+   "status": "required",
+   "process": {
+    "source_size": [
+     755,
+     1715
+    ],
+    "trimmed_size": [
+     755,
+     1715
+    ],
+    "fitted_size": [
+     423,
+     960
+    ],
+    "scale": 0.5598,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). Confirmed File on Princesses/Gallery/Season 2 Renders → Princess Sapphire → Render 1."
+  }
+ ]
+}

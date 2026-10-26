@@ -150,9 +150,11 @@
       <h2>我的畫冊</h2>
       <span class="head-spacer"></span>
     </header>
+    <p class="uat-banner" id="uat-banner" hidden>預覽模式：可以翻看全部季度和卡片，不會改收集進度。<button type="button" id="uat-exit">離開預覽</button></p>
     <div class="season-bar" role="tablist" aria-label="季度">
-      <button class="season-chip on" id="album-season" data-season="s1" role="tab" type="button">第一季 0 / 81</button>
-      <button class="season-chip locked" id="album-season-2" data-season="s2" role="tab" type="button">🔒 第二季 敬請期待</button>
+      <button class="season-chip on" id="album-season" data-season="s1" role="tab" type="button">奇妙萌可 0 / 81</button>
+      <button class="season-chip locked" id="album-season-2" data-season="s2" role="tab" type="button">🔒 奇妙萌可第二季 敬請期待</button>
+      <button class="season-chip locked" id="album-season-3" data-season="s3" role="tab" type="button">🔒 閃亮寶石 敬請期待</button>
     </div>
     <div class="tabs" role="tablist">
       <button class="tab active" data-tab="momoke" role="tab" type="button">萌可</button>
@@ -184,9 +186,9 @@
   <section id="screen-celebrate" class="screen" aria-label="恭喜">
     <div class="sparkles on" aria-hidden="true" id="celebrate-sparkles"></div>
     <div class="celebrate-emoji">🏆</div>
-    <h2 class="celebrate-title" id="celebrate-title">恭喜集齊第一季！</h2>
+    <h2 class="celebrate-title" id="celebrate-title">恭喜集齊奇妙萌可！</h2>
     <p class="result-msg">你每天都認真刷牙，<br>收集了全部卡片！</p>
-    <div class="locked-card" id="celebrate-box"><span class="lock" id="celebrate-lock">🔒</span><span id="celebrate-next">第二季 敬請期待</span></div>
+    <div class="locked-card" id="celebrate-box"><span class="lock" id="celebrate-lock">🔒</span><span id="celebrate-next">奇妙萌可第二季 敬請期待</span></div>
     <button class="btn btn-pink" id="btn-celebrate-unlock" type="button" hidden>下一步</button>
     <button class="btn btn-purple" id="btn-celebrate-album" data-go="album" type="button">看看我的畫冊</button>
     <button class="btn btn-pink" id="btn-celebrate-home" data-go="home" type="button">回到主頁</button>
@@ -255,7 +257,7 @@
       <input type="file" id="import-file" accept="application/json,.json" hidden>
       <button class="btn btn-small btn-danger" id="btn-reset" type="button">重設所有資料</button>
       <button class="btn btn-small btn-ghost" id="btn-parent-close" type="button">關閉</button>
-      <p class="parent-rules">規則：每天以凌晨四點為分界。在早上時段（四點至中午十二點）或晚上時段（下午五點至凌晨四點）完整刷牙兩分鐘，每次都能得到一張卡片；每個時段最多一張，每天最多兩張。漏刷只會少一張卡片，已收集的卡片永遠保留。在時段以外刷牙，或同一時段再刷一次，會計時和稱讚，但不會得到卡片。刷牙開始時就會決定這次的卡片，卡片蓋著泡泡，刷牙時牙刷會慢慢把泡泡刷走，刷滿兩分鐘就完全露出；中途停止的話，下次刷牙仍是同一張（泡泡會重新蓋好）。按「開始刷牙」後會先倒數十秒，讓小朋友準備好牙刷和牙膏，倒數不計入兩分鐘；在時段開始或結束前後刷牙時，倒數開始或真正開始刷牙的時間只要其中一個在時段內，就能得到該時段的卡片。第一季共 81 張，每天兩張約 41 天集齊。</p>
+      <p class="parent-rules">規則：每天以凌晨四點為分界。在早上時段（四點至中午十二點）或晚上時段（下午五點至凌晨四點）完整刷牙兩分鐘，每次都能得到一張卡片；每個時段最多一張，每天最多兩張。漏刷只會少一張卡片，已收集的卡片永遠保留。在時段以外刷牙，或同一時段再刷一次，會計時和稱讚，但不會得到卡片。刷牙開始時就會決定這次的卡片，卡片蓋著泡泡，刷牙時牙刷會慢慢把泡泡刷走，刷滿兩分鐘就完全露出；中途停止的話，下次刷牙仍是同一張（泡泡會重新蓋好）。按「開始刷牙」後會先倒數十秒，讓小朋友準備好牙刷和牙膏，倒數不計入兩分鐘；在時段開始或結束前後刷牙時，倒數開始或真正開始刷牙的時間只要其中一個在時段內，就能得到該時段的卡片。奇妙萌可共 81 張，每天兩張約 41 天集齊。集齊後開放奇妙萌可第二季（74 張），再集齊後開放閃亮寶石（76 張）。</p>
     </div>
   </div>
 

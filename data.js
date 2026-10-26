@@ -3,6 +3,8 @@
  * ---------------------------------------------------------------
  * 第一季共 81 張：24 萌可 + 5 公主 + 52 劇照。
  * 第二季共 74 張：20 萌可 + 2 公主 + 52 劇照。第一季集齊後開放，鬧鬧萌可變成幸福萌可（第二季第 1 張，直接送）。
+ * 第三季《閃亮寶石》共 76 張：20 萌可 + 4 公主 + 52 劇照。第二季集齊後開放，妖妖萌可變成愛心萌可本季造型（第三季第 1 張，直接送）。
+ * 畫冊晶片標題（用戶確認）：s1 奇妙萌可、s2 奇妙萌可第二季、s3 閃亮寶石。未來 s4 標題預留：魔法鑰匙（本版不加第四季資料）。
  * 要更換圖片：
  *   1. 把圖片放進 img/s1/、img/princess/ 或 img/stills/（檔名見 README.md）
  *   2. 在下面對應項目設定 img（例如 "img/stills/ep01_a.jpg"）；沒有圖片時為 null
@@ -13,7 +15,7 @@
  *   id       唯一代號（不可更改，已收集的紀錄靠它對應）
  *   season   "s1" / "s2" …
  *   type     "momoke" | "princess" | "still"   → 畫冊分頁：萌可 / 公主 / 劇照
- *   category （只限萌可）"royal" 皇室萌可 | "magic" 魔方萌可 | "villain" 反派萌可
+ *   category （只限萌可）"royal" 皇室萌可 | "magic" 魔方萌可 | "gem" 寶石萌可 | "villain" 反派萌可
  *   princess （只限皇室萌可）對應公主的 id
  *   royal    （只限公主）對應皇室萌可的 id
  *   ep       （只限劇照）集數
@@ -26,7 +28,7 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v17",
+    version: "v18",
 
     // 萬聖節期間覆寫（每年 10 月 28–31 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isHalloween / songFor）：
     // 首頁吉祥物改官方專輯封面；首頁音樂與刷牙音樂都改播萬聖節歌。其他日子不變。
@@ -37,12 +39,12 @@
     seasons: [
       {
         id: "s1",
-        name: "第一季",
+        name: "奇妙萌可",
         open: true,
         total: 81,
         first: ["s1-m-01", "s1-p-01"],   // 第 1、2 次捕捉固定
         finalItem: "s1-m-24",            // 最後一張（第 81 張）：鬧鬧萌可
-        completeTitle: "恭喜集齊第一季！",
+        completeTitle: "恭喜集齊奇妙萌可！",
         // 音樂（檔案會自動加入離線快取 sw.js）：
         //   op   刷牙音樂：這一季的主題曲（片頭曲，有人聲），刷牙時循環播放
         //   home 首頁音樂：主題曲的純音樂版（沒有人聲），主頁小聲循環播放；沒有 home 時主頁改播這一季的 op
@@ -57,18 +59,41 @@
         // first：第 1 張固定；下一次刷牙依皇室→公主規則出陽光公主；神聖公主在其餘非最終卡集齊後（妖妖前最後）；
         // finalItem（妖妖萌可）放最後（第 74 張）。抽卡見 logic.js drawNextS2。
         id: "s2",
-        name: "第二季",
+        name: "奇妙萌可第二季",
         open: true,
         total: 74,
         first: ["s2-m-01"],
         finalItem: "s2-m-20",            // 最後一張（第 74 張）：妖妖萌可
-        completeTitle: "恭喜集齊第二季！",
-        lockedText: "第二季 敬請期待",     // 第一季未集齊時，畫冊的第二季分頁顯示這句
+        completeTitle: "恭喜集齊奇妙萌可第二季！",
+        lockedText: "奇妙萌可第二季 敬請期待", // 第一季未集齊時，畫冊的第二季分頁顯示這句
         transform: { from: "s1-m-24", to: "s2-m-01" },
         // 第二季的主題曲未有檔案：未有歌的季度會沿用最近一季的歌（logic.js songFor）。之後加入：放進 audio/（例如 audio/s2_op.m4a），改成
         //   music: { op: { src: "audio/s2_op.m4a", type: "audio/mp4", title: "歌名", duration: 秒數 },
         //            home: { src: "audio/s2_home.m4a", type: "audio/mp4", title: "歌名", instrumental: true, duration: 秒數 } }  // home 可省略
         music: null
+      },
+      {
+        // 第三季《閃亮寶石》：第二季集齊（74 張）後才開放（logic.js seasonUnlocked / applyUnlocks）。
+        // transform：集齊第二季後，妖妖萌可變成愛心萌可（本季豎琴造型）→ 第三季第 1 張（s3-m-01）直接送出（不用刷牙）。
+        // first：第 1 張固定；下一次刷牙依皇室→公主出鑽石公主。
+        // 笑笑／信信／贊贊（不在 first 的皇室萌可）偏早，並在 earlyWindow 張內連同公主出完；
+        // 其餘寶石萌可與劇照在中段平均抽；finalItem（奉獻萌可）放最後（第 76 張）。抽卡見 logic.js drawNextS3。
+        // 未來第四季畫冊標題預留：魔法鑰匙（本版不加資料）。
+        id: "s3",
+        name: "閃亮寶石",
+        open: true,
+        total: 76,
+        first: ["s3-m-01"],
+        earlyWindow: 24,                 // 第 24 張前出完笑笑、信信、贊贊和對應公主
+        finalItem: "s3-m-20",            // 最後一張（第 76 張）：奉獻萌可
+        completeTitle: "恭喜集齊閃亮寶石！",
+        lockedText: "閃亮寶石 敬請期待",   // 第二季未集齊時，畫冊的第三季分頁顯示這句
+        transform: { from: "s2-m-20", to: "s3-m-01" },
+        // 刷牙播片頭曲（有人聲）；首頁播片尾曲純音樂（短循環）。萬聖節期間仍由 logic.js songFor 覆寫。
+        music: {
+          op: { src: "audio/s3_gem_op.m4a", type: "audio/mp4", title: "閃亮寶石", duration: 55.8 },
+          home: { src: "audio/s3_gem_ed.m4a", type: "audio/mp4", title: "閃亮寶石", instrumental: true, duration: 20.0 }
+        }
       }
     ],
 
@@ -255,6 +280,88 @@
     { id: "s2-still-ep25b", season: "s2", type: "still", ep: 25, name: "長滿藤蔓的街道", img: "img/s2_stills/ep25_b.jpg", blurb: "第25集〈以皇室萌可之名〉", intro: "從一隻粉紅色萌可身後的低角度望去，街道上長滿了巨大的帶刺紫色藤蔓和大朵的花。" },
     { id: "s2-still-ep26a", season: "s2", type: "still", ep: 26, name: "手持魔杖的小萌可", img: "img/s2_stills/ep26_a.jpg", blurb: "第26集〈神聖公主〉", intro: "一隻頭上有粉紅色漩渦、梳著深色雙馬尾、繫著黑色蝴蝶結的紫色小萌可，手持紅色心形魔杖站在橙色平面上，背景是閃爍的粉紅色星空。" },
     { id: "s2-still-ep26b", season: "s2", type: "still", ep: 26, name: "公園裡的擁抱", img: "img/s2_stills/ep26_b.jpg", blurb: "第26集〈神聖公主〉", intro: "三個人背向鏡頭在公園裡擁抱，旁邊的石台上有一個籃子，裡面坐著四隻小萌可。" },
+
+    // ---- 第三季《閃亮寶石》：20 萌可（圖片來自 img/s3_gem/，名稱與次序來自 manifest.json；簡介為用戶確認的 blurb）----
+    { id: "s3-m-01", season: "s3", type: "momoke", category: "royal", name: "愛心萌可", img: "img/s3_gem/00_aixin_gem.jpg", blurb: "本季換成豎琴造型，善良又重感情，句尾「啾」！", princess: "s3-p-01" },
+    { id: "s3-m-02", season: "s3", type: "momoke", category: "royal", name: "笑笑萌可", img: "img/s3_gem/01_xiaoxiao.jpg", blurb: "代表笑容，拿著禮炮煙花，總是笑眯眯，句尾「笑笑」！", princess: "s3-p-02" },
+    { id: "s3-m-03", season: "s3", type: "momoke", category: "royal", name: "信信萌可", img: "img/s3_gem/02_xinxin.jpg", blurb: "代表信任，撐著雨傘，憨厚純真，句尾「真的」！", princess: "s3-p-04" },
+    { id: "s3-m-04", season: "s3", type: "momoke", category: "royal", name: "贊贊萌可", img: "img/s3_gem/03_zanzan.jpg", blurb: "代表善良，拿著梳子，親切和藹，句尾「贊贊」！", princess: "s3-p-03" },
+    { id: "s3-m-05", season: "s3", type: "momoke", category: "gem", name: "嘻嘻萌可", img: "img/s3_gem/04_xixi.jpg", blurb: "愛惡作劇，揮著羽毛扇子。" },
+    { id: "s3-m-06", season: "s3", type: "momoke", category: "gem", name: "弱弱萌可", img: "img/s3_gem/05_ruoruo.jpg", blurb: "容易覺得痛，貼著創可貼。" },
+    { id: "s3-m-07", season: "s3", type: "momoke", category: "gem", name: "願望萌可", img: "img/s3_gem/06_yuanwang.jpg", blurb: "會實現願望，提著神燈。" },
+    { id: "s3-m-08", season: "s3", type: "momoke", category: "gem", name: "安慰萌可", img: "img/s3_gem/07_anwei.jpg", blurb: "最愛安慰別人，裹著毯子。" },
+    { id: "s3-m-09", season: "s3", type: "momoke", category: "gem", name: "躲躲萌可", img: "img/s3_gem/08_duoduo.jpg", blurb: "很膽小，抱著手風琴。" },
+    { id: "s3-m-10", season: "s3", type: "momoke", category: "gem", name: "淨淨萌可", img: "img/s3_gem/09_jingjing.jpg", blurb: "最愛整潔，拿著掃帚。" },
+    { id: "s3-m-11", season: "s3", type: "momoke", category: "gem", name: "美味萌可", img: "img/s3_gem/10_meiwei.jpg", blurb: "很懂品味，拿著湯勺。" },
+    { id: "s3-m-12", season: "s3", type: "momoke", category: "gem", name: "暖暖萌可", img: "img/s3_gem/11_nuannuan.jpg", blurb: "帶來温暖，拿著編織針。" },
+    { id: "s3-m-13", season: "s3", type: "momoke", category: "gem", name: "筆記萌可", img: "img/s3_gem/12_biji.jpg", blurb: "做事很慎密，拿著筆記本和筆。" },
+    { id: "s3-m-14", season: "s3", type: "momoke", category: "gem", name: "公主萌可", img: "img/s3_gem/13_gongzhu.jpg", blurb: "舉止優雅，拿著權杖。" },
+    { id: "s3-m-15", season: "s3", type: "momoke", category: "gem", name: "雙雙萌可", img: "img/s3_gem/14_shuangshuang.jpg", blurb: "喜歡成雙成對，拿著響板。" },
+    { id: "s3-m-16", season: "s3", type: "momoke", category: "gem", name: "分享萌可", img: "img/s3_gem/15_fenxiang.jpg", blurb: "最愛分享，提著禮物盒。" },
+    { id: "s3-m-17", season: "s3", type: "momoke", category: "gem", name: "雕刻萌可", img: "img/s3_gem/16_diaoke.jpg", blurb: "很有創造力，拿著錘子。" },
+    { id: "s3-m-18", season: "s3", type: "momoke", category: "gem", name: "芭蕾萌可", img: "img/s3_gem/17_balei.jpg", blurb: "最愛芭蕾舞，捧著水晶球。" },
+    { id: "s3-m-19", season: "s3", type: "momoke", category: "gem", name: "神奇萌可", img: "img/s3_gem/18_shenqi.jpg", blurb: "很有英雄氣概，拿著迴旋鏢。" },
+    { id: "s3-m-20", season: "s3", type: "momoke", category: "villain", name: "奉獻萌可", img: "img/s3_gem/19_fengxian.jpg", blurb: "戴面具時是假面萌可，很疼愛珍珠，句尾「棒棒」！" },
+
+    // ---- 第三季：4 公主（圖片來自 img/s3_gem_princess/；鑽石←愛心、水晶←笑笑、翡翠←贊贊、藍寶石←信信）----
+    { id: "s3-p-01", season: "s3", type: "princess", name: "鑽石公主", royal: "s3-m-01", img: "img/s3_gem_princess/01_zuanshi.jpg", blurb: "樂美和愛心萌可一起變身成鑽石公主！" },
+    { id: "s3-p-02", season: "s3", type: "princess", name: "水晶公主", royal: "s3-m-02", img: "img/s3_gem_princess/02_shuijing.jpg", blurb: "樂美和笑笑萌可一起變身成水晶公主！" },
+    { id: "s3-p-03", season: "s3", type: "princess", name: "翡翠公主", royal: "s3-m-04", img: "img/s3_gem_princess/03_feicui.jpg", blurb: "樂美和贊贊萌可一起變身成翡翠公主！" },
+    { id: "s3-p-04", season: "s3", type: "princess", name: "藍寶石公主", royal: "s3-m-03", img: "img/s3_gem_princess/04_lanshiba.jpg", blurb: "樂美和信信萌可一起變身成藍寶石公主！" },
+
+    // ---- 第三季：52 張劇照（每集 a、b 兩張）。畫面上只顯示「第 N 集」；name / blurb 保留集數標題 ----
+    { id: "s3-still-ep01a", season: "s3", type: "still", ep: 1, name: "閃閃亮亮，寶石萌可", img: "img/s3_gem_stills/ep01_a.jpg", blurb: "第1集〈閃閃亮亮，寶石萌可〉", intro: "" },
+    { id: "s3-still-ep01b", season: "s3", type: "still", ep: 1, name: "閃閃亮亮，寶石萌可", img: "img/s3_gem_stills/ep01_b.jpg", blurb: "第1集〈閃閃亮亮，寶石萌可〉", intro: "" },
+    { id: "s3-still-ep02a", season: "s3", type: "still", ep: 2, name: "萌可學校開學！", img: "img/s3_gem_stills/ep02_a.jpg", blurb: "第2集〈萌可學校開學！〉", intro: "" },
+    { id: "s3-still-ep02b", season: "s3", type: "still", ep: 2, name: "萌可學校開學！", img: "img/s3_gem_stills/ep02_b.jpg", blurb: "第2集〈萌可學校開學！〉", intro: "" },
+    { id: "s3-still-ep03a", season: "s3", type: "still", ep: 3, name: "忍耐癢癢大對決", img: "img/s3_gem_stills/ep03_a.jpg", blurb: "第3集〈忍耐癢癢大對決〉", intro: "" },
+    { id: "s3-still-ep03b", season: "s3", type: "still", ep: 3, name: "忍耐癢癢大對決", img: "img/s3_gem_stills/ep03_b.jpg", blurb: "第3集〈忍耐癢癢大對決〉", intro: "" },
+    { id: "s3-still-ep04a", season: "s3", type: "still", ep: 4, name: "哎呀哎呀不要裝了", img: "img/s3_gem_stills/ep04_a.jpg", blurb: "第4集〈哎呀哎呀不要裝了〉", intro: "" },
+    { id: "s3-still-ep04b", season: "s3", type: "still", ep: 4, name: "哎呀哎呀不要裝了", img: "img/s3_gem_stills/ep04_b.jpg", blurb: "第4集〈哎呀哎呀不要裝了〉", intro: "" },
+    { id: "s3-still-ep05a", season: "s3", type: "still", ep: 5, name: "願望萌可的三個心願", img: "img/s3_gem_stills/ep05_a.jpg", blurb: "第5集〈願望萌可的三個心願〉", intro: "" },
+    { id: "s3-still-ep05b", season: "s3", type: "still", ep: 5, name: "願望萌可的三個心願", img: "img/s3_gem_stills/ep05_b.jpg", blurb: "第5集〈願望萌可的三個心願〉", intro: "" },
+    { id: "s3-still-ep06a", season: "s3", type: "still", ep: 6, name: "拍拍，我來安慰你", img: "img/s3_gem_stills/ep06_a.jpg", blurb: "第6集〈拍拍，我來安慰你〉", intro: "" },
+    { id: "s3-still-ep06b", season: "s3", type: "still", ep: 6, name: "拍拍，我來安慰你", img: "img/s3_gem_stills/ep06_b.jpg", blurb: "第6集〈拍拍，我來安慰你〉", intro: "" },
+    { id: "s3-still-ep07a", season: "s3", type: "still", ep: 7, name: "樂美不見了", img: "img/s3_gem_stills/ep07_a.jpg", blurb: "第7集〈樂美不見了〉", intro: "" },
+    { id: "s3-still-ep07b", season: "s3", type: "still", ep: 7, name: "樂美不見了", img: "img/s3_gem_stills/ep07_b.jpg", blurb: "第7集〈樂美不見了〉", intro: "" },
+    { id: "s3-still-ep08a", season: "s3", type: "still", ep: 8, name: "乾淨到閃閃發光", img: "img/s3_gem_stills/ep08_a.jpg", blurb: "第8集〈乾淨到閃閃發光〉", intro: "" },
+    { id: "s3-still-ep08b", season: "s3", type: "still", ep: 8, name: "乾淨到閃閃發光", img: "img/s3_gem_stills/ep08_b.jpg", blurb: "第8集〈乾淨到閃閃發光〉", intro: "" },
+    { id: "s3-still-ep09a", season: "s3", type: "still", ep: 9, name: "美味萌可是最棒的料理老師", img: "img/s3_gem_stills/ep09_a.jpg", blurb: "第9集〈美味萌可是最棒的料理老師〉", intro: "" },
+    { id: "s3-still-ep09b", season: "s3", type: "still", ep: 9, name: "美味萌可是最棒的料理老師", img: "img/s3_gem_stills/ep09_b.jpg", blurb: "第9集〈美味萌可是最棒的料理老師〉", intro: "" },
+    { id: "s3-still-ep10a", season: "s3", type: "still", ep: 10, name: "信信萌可倒下了", img: "img/s3_gem_stills/ep10_a.jpg", blurb: "第10集〈信信萌可倒下了〉", intro: "" },
+    { id: "s3-still-ep10b", season: "s3", type: "still", ep: 10, name: "信信萌可倒下了", img: "img/s3_gem_stills/ep10_b.jpg", blurb: "第10集〈信信萌可倒下了〉", intro: "" },
+    { id: "s3-still-ep11a", season: "s3", type: "still", ep: 11, name: "愛心萌可變成了毛線娃娃", img: "img/s3_gem_stills/ep11_a.jpg", blurb: "第11集〈愛心萌可變成了毛線娃娃〉", intro: "" },
+    { id: "s3-still-ep11b", season: "s3", type: "still", ep: 11, name: "愛心萌可變成了毛線娃娃", img: "img/s3_gem_stills/ep11_b.jpg", blurb: "第11集〈愛心萌可變成了毛線娃娃〉", intro: "" },
+    { id: "s3-still-ep12a", season: "s3", type: "still", ep: 12, name: "熊娃娃活了？", img: "img/s3_gem_stills/ep12_a.jpg", blurb: "第12集〈熊娃娃活了？〉", intro: "" },
+    { id: "s3-still-ep12b", season: "s3", type: "still", ep: 12, name: "熊娃娃活了？", img: "img/s3_gem_stills/ep12_b.jpg", blurb: "第12集〈熊娃娃活了？〉", intro: "" },
+    { id: "s3-still-ep13a", season: "s3", type: "still", ep: 13, name: "第二位公主", img: "img/s3_gem_stills/ep13_a.jpg", blurb: "第13集〈第二位公主〉", intro: "" },
+    { id: "s3-still-ep13b", season: "s3", type: "still", ep: 13, name: "第二位公主", img: "img/s3_gem_stills/ep13_b.jpg", blurb: "第13集〈第二位公主〉", intro: "" },
+    { id: "s3-still-ep14a", season: "s3", type: "still", ep: 14, name: "筆記萌可的筆記", img: "img/s3_gem_stills/ep14_a.jpg", blurb: "第14集〈筆記萌可的筆記〉", intro: "" },
+    { id: "s3-still-ep14b", season: "s3", type: "still", ep: 14, name: "筆記萌可的筆記", img: "img/s3_gem_stills/ep14_b.jpg", blurb: "第14集〈筆記萌可的筆記〉", intro: "" },
+    { id: "s3-still-ep15a", season: "s3", type: "still", ep: 15, name: "皇室萌可大對決", img: "img/s3_gem_stills/ep15_a.jpg", blurb: "第15集〈皇室萌可大對決〉", intro: "" },
+    { id: "s3-still-ep15b", season: "s3", type: "still", ep: 15, name: "皇室萌可大對決", img: "img/s3_gem_stills/ep15_b.jpg", blurb: "第15集〈皇室萌可大對決〉", intro: "" },
+    { id: "s3-still-ep16a", season: "s3", type: "still", ep: 16, name: "愛心玫瑰烘焙店變成了皇宮", img: "img/s3_gem_stills/ep16_a.jpg", blurb: "第16集〈愛心玫瑰烘焙店變成了皇宮〉", intro: "" },
+    { id: "s3-still-ep16b", season: "s3", type: "still", ep: 16, name: "愛心玫瑰烘焙店變成了皇宮", img: "img/s3_gem_stills/ep16_b.jpg", blurb: "第16集〈愛心玫瑰烘焙店變成了皇宮〉", intro: "" },
+    { id: "s3-still-ep17a", season: "s3", type: "still", ep: 17, name: "寶石萌可被偷了", img: "img/s3_gem_stills/ep17_a.jpg", blurb: "第17集〈寶石萌可被偷了〉", intro: "" },
+    { id: "s3-still-ep17b", season: "s3", type: "still", ep: 17, name: "寶石萌可被偷了", img: "img/s3_gem_stills/ep17_b.jpg", blurb: "第17集〈寶石萌可被偷了〉", intro: "" },
+    { id: "s3-still-ep18a", season: "s3", type: "still", ep: 18, name: "誰是真正的愛心萌可", img: "img/s3_gem_stills/ep18_a.jpg", blurb: "第18集〈誰是真正的愛心萌可〉", intro: "" },
+    { id: "s3-still-ep18b", season: "s3", type: "still", ep: 18, name: "誰是真正的愛心萌可", img: "img/s3_gem_stills/ep18_b.jpg", blurb: "第18集〈誰是真正的愛心萌可〉", intro: "" },
+    { id: "s3-still-ep19a", season: "s3", type: "still", ep: 19, name: "尋找禮物盒", img: "img/s3_gem_stills/ep19_a.jpg", blurb: "第19集〈尋找禮物盒〉", intro: "" },
+    { id: "s3-still-ep19b", season: "s3", type: "still", ep: 19, name: "尋找禮物盒", img: "img/s3_gem_stills/ep19_b.jpg", blurb: "第19集〈尋找禮物盒〉", intro: "" },
+    { id: "s3-still-ep20a", season: "s3", type: "still", ep: 20, name: "我要刻雕像，當當", img: "img/s3_gem_stills/ep20_a.jpg", blurb: "第20集〈我要刻雕像，當當〉", intro: "" },
+    { id: "s3-still-ep20b", season: "s3", type: "still", ep: 20, name: "我要刻雕像，當當", img: "img/s3_gem_stills/ep20_b.jpg", blurb: "第20集〈我要刻雕像，當當〉", intro: "" },
+    { id: "s3-still-ep21a", season: "s3", type: "still", ep: 21, name: "危險的郊遊", img: "img/s3_gem_stills/ep21_a.jpg", blurb: "第21集〈危險的郊遊〉", intro: "" },
+    { id: "s3-still-ep21b", season: "s3", type: "still", ep: 21, name: "危險的郊遊", img: "img/s3_gem_stills/ep21_b.jpg", blurb: "第21集〈危險的郊遊〉", intro: "" },
+    { id: "s3-still-ep22a", season: "s3", type: "still", ep: 22, name: "萌可芭蕾舞團成立", img: "img/s3_gem_stills/ep22_a.jpg", blurb: "第22集〈萌可芭蕾舞團成立〉", intro: "" },
+    { id: "s3-still-ep22b", season: "s3", type: "still", ep: 22, name: "萌可芭蕾舞團成立", img: "img/s3_gem_stills/ep22_b.jpg", blurb: "第22集〈萌可芭蕾舞團成立〉", intro: "" },
+    { id: "s3-still-ep23a", season: "s3", type: "still", ep: 23, name: "英雄型萌可 神奇萌可", img: "img/s3_gem_stills/ep23_a.jpg", blurb: "第23集〈英雄型萌可 神奇萌可〉", intro: "" },
+    { id: "s3-still-ep23b", season: "s3", type: "still", ep: 23, name: "英雄型萌可 神奇萌可", img: "img/s3_gem_stills/ep23_b.jpg", blurb: "第23集〈英雄型萌可 神奇萌可〉", intro: "" },
+    { id: "s3-still-ep24a", season: "s3", type: "still", ep: 24, name: "萌可學校畢業儀式", img: "img/s3_gem_stills/ep24_a.jpg", blurb: "第24集〈萌可學校畢業儀式〉", intro: "" },
+    { id: "s3-still-ep24b", season: "s3", type: "still", ep: 24, name: "萌可學校畢業儀式", img: "img/s3_gem_stills/ep24_b.jpg", blurb: "第24集〈萌可學校畢業儀式〉", intro: "" },
+    { id: "s3-still-ep25a", season: "s3", type: "still", ep: 25, name: "陷入危機的愛心萌可", img: "img/s3_gem_stills/ep25_a.jpg", blurb: "第25集〈陷入危機的愛心萌可〉", intro: "" },
+    { id: "s3-still-ep25b", season: "s3", type: "still", ep: 25, name: "陷入危機的愛心萌可", img: "img/s3_gem_stills/ep25_b.jpg", blurb: "第25集〈陷入危機的愛心萌可〉", intro: "" },
+    { id: "s3-still-ep26a", season: "s3", type: "still", ep: 26, name: "寶石森林恢復如初", img: "img/s3_gem_stills/ep26_a.jpg", blurb: "第26集〈寶石森林恢復如初〉", intro: "" },
+    { id: "s3-still-ep26b", season: "s3", type: "still", ep: 26, name: "寶石森林恢復如初", img: "img/s3_gem_stills/ep26_b.jpg", blurb: "第26集〈寶石森林恢復如初〉", intro: "" },
     ]
   };
 

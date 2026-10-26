@@ -7,11 +7,13 @@
   var ZONES = ["上排左邊", "上排右邊", "下排左邊", "下排右邊"];
   var CHEERS = ["加油！", "刷得真好！", "慢慢刷乾淨！", "快完成了！"];
   var WEEKDAYS = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-  var TYPE_LABEL = { royal: "皇室萌可", magic: "魔方萌可", villain: "反派萌可", princess: "公主", still: "劇照" };
+  var TYPE_LABEL = { royal: "皇室萌可", magic: "魔方萌可", gem: "寶石萌可", villain: "反派萌可", princess: "公主", still: "劇照" };
 
   // ---------- 測試用隱藏參數（只在 ?test=1 時生效，介面不會顯示） ----------
   var params = new URLSearchParams(location.search);
   var TEST = params.get("test") === "1";
+  // 家長預覽（?uat=1）：只放寬畫冊翻看，不改收集進度。沒有參數時 UAT 為 false。
+  var UAT = L.isUatMode(location.search);
   var SPEED = 1, CLOCK_OFFSET = 0;
   if (TEST) {
     SPEED = Math.max(1, Number(params.get("speed")) || 1);
@@ -170,8 +172,9 @@
   }
   function hintText(ts, day, complete, slotNow, h) {
     if (complete) {
-      if (L.isSeasonComplete(state, "s2")) return "恭喜集齊第二季！每天也要好好刷牙！";
-      if (L.isSeasonComplete(state, "s1")) return "恭喜集齊第一季！每天也要好好刷牙！";
+      var last = null;
+      DATA.seasons.forEach(function (s) { if (L.isSeasonComplete(state, s.id)) last = s; });
+      if (last && last.completeTitle) return last.completeTitle.replace(/！$/, "！每天也要好好刷牙！");
       return "每天也要好好刷牙！";
     }
     var cards = L.cardsOnDay(day);
@@ -944,29 +947,33 @@
   $("unlock-album").addEventListener("click", function () { go("album"); });
 
   // ---------- 畫冊 ----------
-  // 上方「第一季 / 第二季」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算（沒有該類型卡片的分頁會隱藏；第二季有 2 張公主）。
-  // 第二季未開放（第一季未集齊）時，第二季顯示「🔒 第二季 敬請期待」，不能點。
+  // 上方「奇妙萌可 / 奇妙萌可第二季 / 閃亮寶石」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算。
+  // 未開放的季度顯示「🔒 … 敬請期待」，不能點。?uat=1 時每一季、每一張都可以翻看（不寫入收集進度）。
   var albumTab = "momoke";
   var albumSeason = "s1";
   var TAB_NAMES = { momoke: "萌可", princess: "公主", still: "劇照" };
   function tabItems(tab, sid) { return L.seasonItems(sid || albumSeason).filter(function (it) { return it.type === tab; }); }
   function renderAlbum() {
-    var have = L.collectedSet(state);
-    if (!L.seasonUnlocked(state, albumSeason)) albumSeason = "s1";
-    var chips = [["album-season", "s1"], ["album-season-2", "s2"]];
+    if (!L.albumSeasonOpen(state, albumSeason, UAT)) albumSeason = "s1";
+    var view = L.albumView(state, albumSeason, UAT);
+    var rowById = {};
+    view.items.forEach(function (row) { rowById[row.id] = row; });
+    var chips = [["album-season", "s1"], ["album-season-2", "s2"], ["album-season-3", "s3"]];
     chips.forEach(function (c) {
-      var sid = c[1], chip = $(c[0]), open = L.seasonUnlocked(state, sid), sdef = L.season(sid);
+      var sid = c[1], chip = $(c[0]), open = L.albumSeasonOpen(state, sid, UAT), sdef = L.season(sid);
       chip.classList.toggle("on", open && sid === albumSeason);
       chip.classList.toggle("locked", !open);
       chip.disabled = !open;
       chip.setAttribute("aria-selected", open && sid === albumSeason ? "true" : "false");
       chip.textContent = open ? seasonName(sid) + " " + L.collectedIn(state, sid).length + " / " + seasonTotal(sid) : "🔒 " + (sdef.lockedText || seasonName(sid) + " 敬請期待");
     });
+    var banner = $("uat-banner");
+    if (banner) banner.hidden = !UAT;
     document.querySelectorAll(".tab").forEach(function (t) {
       var tab = t.getAttribute("data-tab");
       var items = tabItems(tab);
       t.hidden = !items.length;
-      var n = items.filter(function (it) { return have[it.id]; }).length;
+      var n = items.filter(function (it) { var row = rowById[it.id]; return row && row.collected; }).length;
       t.classList.toggle("active", tab === albumTab);
       t.setAttribute("aria-selected", tab === albumTab ? "true" : "false");
       t.innerHTML = "";
@@ -978,26 +985,32 @@
     grid.innerHTML = "";
     grid.classList.toggle("grid-still", albumTab === "still");
     tabItems(albumTab).forEach(function (it) {
-      var got = !!have[it.id];
-      var c = el("button", "cell" + (got ? "" : " locked"));
+      var row = rowById[it.id];
+      var show = !!(row && row.revealed);
+      var c = el("button", "cell" + (show ? "" : " locked"));
       c.type = "button";
       var box = el("div", "cell-img");
-      if (got) box.appendChild(cardVisual(it)); else box.textContent = "？";
+      if (show) box.appendChild(cardVisual(it)); else box.textContent = "？";
       c.appendChild(box);
-      c.appendChild(el("div", "cell-name", got ? shown(it).name : "？？？"));
-      if (got) {
+      c.appendChild(el("div", "cell-name", show ? shown(it).name : "？？？"));
+      if (show) {
         c.setAttribute("data-id", it.id);
         c.addEventListener("click", function () { openViewer(albumTab, it.id); });
       }
       grid.appendChild(c);
     });
   }
-  ["album-season", "album-season-2"].forEach(function (id) {
+  ["album-season", "album-season-2", "album-season-3"].forEach(function (id) {
     $(id).addEventListener("click", function () {
       var sid = this.getAttribute("data-season");
-      if (!L.seasonUnlocked(state, sid)) return;
+      if (!L.albumSeasonOpen(state, sid, UAT)) return;
       albumSeason = sid; renderAlbum();
     });
+  });
+  $("uat-exit").addEventListener("click", function () {
+    var u = new URL(location.href);
+    u.searchParams.delete("uat");
+    location.replace(u.href);
   });
   document.querySelectorAll(".tab").forEach(function (t) {
     t.addEventListener("click", function () { albumTab = t.getAttribute("data-tab"); renderAlbum(); });
@@ -1006,8 +1019,10 @@
   // ---------- 全螢幕卡片 + 左右滑動 ----------
   var viewer = { list: [], idx: 0 };
   function openViewer(tab, id) {
-    var have = L.collectedSet(state);
-    viewer.list = tabItems(tab).filter(function (it) { return have[it.id]; });
+    var view = L.albumView(state, albumSeason, UAT);
+    var revealed = {};
+    view.items.forEach(function (row) { if (row.revealed) revealed[row.id] = true; });
+    viewer.list = tabItems(tab).filter(function (it) { return revealed[it.id]; });
     viewer.idx = Math.max(0, viewer.list.findIndex(function (it) { return it.id === id; }));
     $("viewer").hidden = false;
     renderViewer();
@@ -1114,7 +1129,10 @@
   function openParent() {
     var days = Object.keys(state.days).filter(function (k) { var d = state.days[k]; return d.m || d.e; }).length;
     var info = "已收集 " + L.collectedIn(state, "s1").length + " / " + seasonTotal("s1") + " 張卡片";
-    if (L.seasonUnlocked(state, "s2")) info += "（第二季 " + L.collectedIn(state, "s2").length + " / " + seasonTotal("s2") + " 張）";
+    DATA.seasons.forEach(function (s) {
+      if (s.id === "s1" || !L.seasonUnlocked(state, s.id)) return;
+      info += "（" + s.name + " " + L.collectedIn(state, s.id).length + " / " + seasonTotal(s.id) + " 張）";
+    });
     $("parent-info").textContent = info + "，共有 " + days + " 天的刷牙紀錄。";
     renderMusicToggle();
     renderHomeMusicToggle();
