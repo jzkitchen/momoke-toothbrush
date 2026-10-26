@@ -13,7 +13,9 @@
  *     news: ["s2"] }                                  （可省略）還沒有顯示過的「新一季開始」通知（季度 id）；顯示後移除
  * 第二季（74 張）：第一季集齊後開放；鬧鬧萌可變成幸福萌可 → s2-m-01 直接送出（applyUnlocks，不佔刷牙時段），
  * 下一次刷牙出陽光公主（皇室→公主）；神聖公主在其餘非最終卡集齊後出；妖妖萌可（s2-m-20）最後。
- * 進度資料格式仍是 schema 2，舊資料不用轉換（news 沒有就當作沒有；新公主卡為加項）。
+ * 第三季《閃亮寶石》（76 張）：第二季集齊後開放；妖妖萌可變成愛心萌可（本季造型）→ s3-m-01 直接送出。
+ * 下一次刷牙出鑽石公主；笑笑／信信／贊贊偏早，公主緊接其皇室萌可；寶石萌可與劇照在中段；奉獻萌可（s3-m-20）最後。
+ * 進度資料格式仍是 schema 2，舊資料不用轉換（news 沒有就當作沒有；新卡為加項，不重設已收集的卡）。
  * 舊格式（schema 1）：days[k] = { m, e, cap, x }，由 migrateState() 轉換。
  */
 (function (root, factory) {
@@ -247,6 +249,61 @@
   }
 
   /**
+   * 第三季抽卡（對齊第二季的皇室→公主、反派最後，並讓笑笑／信信／贊贊偏早）：
+   *  1) first（s3-m-01 愛心萌可本季造型；通常由 applyUnlocks 直接送出）
+   *  2) 皇室萌可已收集但公主未收集 → 公主
+   *     （鑽石←愛心、水晶←笑笑、藍寶石←信信、翡翠←贊贊）
+   *  3) 不在 first 的皇室萌可尚未集齊時，只從她們和劇照裡抽（寶石萌可留到中段）。
+   *     距離 earlyWindow 所剩格數 ≤ 2R（R = 未收集的早期皇室數，每位佔自己 + 公主）時必須抽皇室萌可；
+   *     否則皇室與劇照約各半，所以她們偏早，劇照仍會穿插。
+   *  4) 早期皇室都收集後：其餘寶石萌可與剩下的劇照平均抽
+   *  5) finalItem 奉獻萌可（第 76 張）
+   */
+  function drawNextS3(collectedIds, rng) {
+    var S3 = season("s3");
+    var have = {};
+    collectedIds.forEach(function (id) { have[id] = true; });
+    var items = seasonItems("s3");
+    var finalId = S3.finalItem;
+    var nonFinal = items.filter(function (it) { return it.id !== finalId; });
+    var uncollectedNonFinal = nonFinal.filter(function (it) { return !have[it.id]; });
+
+    if (!uncollectedNonFinal.length) return have[finalId] ? null : finalId;
+
+    var s3Collected = collectedIds.filter(function (id) { return byId[id] && byId[id].season === "s3"; });
+    var n = s3Collected.length + 1;
+    if (S3.first && n <= S3.first.length && !have[S3.first[n - 1]]) return S3.first[n - 1];
+
+    for (var i = s3Collected.length - 1; i >= 0; i--) {
+      var it = byId[s3Collected[i]];
+      if (it && it.category === "royal" && it.princess && !have[it.princess]) return it.princess;
+    }
+
+    var firstSet = {};
+    (S3.first || []).forEach(function (id) { firstSet[id] = 1; });
+    var earlyLeft = uncollectedNonFinal.filter(function (it) {
+      return it.category === "royal" && !firstSet[it.id];
+    });
+    if (earlyLeft.length) {
+      var windowEnd = S3.earlyWindow || 24;
+      var slotsLeft = windowEnd - s3Collected.length;
+      var need = earlyLeft.length * 2;
+      var stills = uncollectedNonFinal.filter(function (it) { return it.type === "still"; });
+      if (slotsLeft <= need || !stills.length) return pick(earlyLeft, rng).id;
+      var pool = stills.slice();
+      var copies = Math.max(1, Math.round(stills.length / earlyLeft.length));
+      earlyLeft.forEach(function (r) {
+        for (var k = 0; k < copies; k++) pool.push(r);
+      });
+      return pick(pool, rng).id;
+    }
+
+    var rest = uncollectedNonFinal.filter(function (it) { return it.type !== "princess"; });
+    if (!rest.length) return uncollectedNonFinal[0].id;
+    return pick(rest, rng).id;
+  }
+
+  /**
    * 其他尚未實作特別規則的季度：first → 其餘平均抽 → finalItem 最後。
    */
   function drawNextGeneric(sid, collectedIds, rng) {
@@ -266,6 +323,7 @@
     var ids = state.collected.map(function (c) { return c.id; });
     if (sid === "s1") return drawNextS1(ids, rng);
     if (sid === "s2") return drawNextS2(ids, rng);
+    if (sid === "s3") return drawNextS3(ids, rng);
     return drawNextGeneric(sid, ids, rng);
   }
 
@@ -521,7 +579,7 @@
     season: season, seasonItems: seasonItems, emptyState: emptyState, normalizeState: normalizeState,
     collectedSet: collectedSet, collectedIn: collectedIn, currentSeasonId: currentSeasonId,
     isSeasonComplete: isSeasonComplete, seasonUnlocked: seasonUnlocked, displaySeasonId: displaySeasonId,
-    applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNextS2: drawNextS2, drawNext: drawNext,
+    applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNextS2: drawNextS2, drawNextS3: drawNextS3, drawNext: drawNext,
     getDay: getDay, validPending: validPending, ensurePending: ensurePending, planBrush: planBrush,
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,

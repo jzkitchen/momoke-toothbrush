@@ -564,14 +564,14 @@ console.log("✓ 日子與時段");
     const seq = [];
     let id;
     seq.push("s2-m-01");
-    while ((id = L.drawNext(st, R))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); st.pending = null; ok(seq.length <= S2TOTAL, "不可多於 74 張"); }
+    while (L.collectedIn(st, "s2").length < S2TOTAL && (id = L.drawNext(st, R))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); st.pending = null; ok(seq.length <= S2TOTAL, "不可多於 74 張"); }
     eq(seq.length, S2TOTAL, "共 74 張"); eq(new Set(seq).size, S2TOTAL, "74 張不重複");
     eq(seq[0], "s2-m-01", "第 1 張幸福萌可"); eq(seq[1], "s2-p-01", "第 2 張陽光公主");
     eq(seq[S2TOTAL - 2], "s2-p-02", "第 73 張神聖公主"); eq(seq[S2TOTAL - 1], S2FINAL, "第 74 張妖妖萌可");
     ok(seq.every((x) => L.byId[x].season === "s2"), "只有第二季");
     eq(seq.filter((x) => L.byId[x].type === "princess").length, 2, "剛好 2 張公主");
     for (let i = 2; i < S2TOTAL - 2; i++) ok(L.byId[seq[i]].type !== "princess" && seq[i] !== S2FINAL, "中段無公主無妖妖 @" + i);
-    eq(L.currentSeasonId(st), null, "兩季集齊後 currentSeasonId = null");
+    eq(L.currentSeasonId(st), "s3", "第二季集齊後進入第三季");
     if (run < 200) {
       const mid = seq.slice(2, S2TOTAL - 2);
       const firstStill = mid.findIndex((x) => L.byId[x].type === "still");
@@ -590,7 +590,7 @@ console.log("✓ 日子與時段");
     ok(Math.abs(frac - 52 / 70) < 0.05, "陽光之後萌可和劇照平均混合 (" + frac.toFixed(3) + ")"); }
   for (const fixed of [0, 0.999999, 0.5]) {
     const st = baseS1(); L.applyUnlocks(st, 0); let id, n = 1, seq = ["s2-m-01"];
-    while ((id = L.drawNext(st, () => fixed))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); n++; }
+    while (L.collectedIn(st, "s2").length < S2TOTAL && (id = L.drawNext(st, () => fixed))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); n++; }
     eq(n, S2TOTAL); eq(seq[1], "s2-p-01"); eq(seq[S2TOTAL - 2], "s2-p-02"); eq(seq[S2TOTAL - 1], S2FINAL);
   }
 
@@ -620,27 +620,28 @@ console.log("✓ 日子與時段");
     let d = new Date(2026, 9, 1), n = 0;
     while (L.collectedIn(st, "s2").length < S2TOTAL && n++ < 200) {
       const k = L.ymd(d);
-      for (const hm of ["T07:00", "T20:00"]) { if (L.collectedIn(st, "s2").length >= S2TOTAL) break; const r = L.recordBrush(st, T(k + hm), T(k + hm) + 120000, R); ok(r.kind === "capture" || r.kind === "again"); if (r.kind === "capture") eq(r.unlock, null); }
+      for (const hm of ["T07:00", "T20:00"]) { if (L.collectedIn(st, "s2").length >= S2TOTAL) break; const r = L.recordBrush(st, T(k + hm), T(k + hm) + 120000, R); ok(r.kind === "capture" || r.kind === "again"); if (r.kind === "capture") { if (r.item.id === S2FINAL) ok(r.unlock && r.unlock.item.id === "s3-m-01" && r.seasonComplete === "s2"); else eq(r.unlock, null); } }
       d.setDate(d.getDate() + 1);
     }
-    eq(L.collectedIn(st, "s2").length, S2TOTAL); eq(st.collected.length, TOTAL + S2TOTAL);
-    eq(new Set(st.collected.map((c) => c.id)).size, TOTAL + S2TOTAL, "兩季共 155 張不重複");
+    eq(L.collectedIn(st, "s2").length, S2TOTAL); eq(L.collectedIn(st, "s3").length, 1, "集齊第二季時送出第三季第 1 張");
+    eq(st.collected.length, TOTAL + S2TOTAL + 1);
+    eq(st.collected[st.collected.length - 1].id, "s3-m-01");
+    eq(new Set(st.collected.map((c) => c.id)).size, TOTAL + S2TOTAL + 1, "兩季加贈禮不重複");
     const s2ids = st.collected.filter((c) => L.byId[c.id].season === "s2").map((c) => c.id);
     eq(s2ids[0], "s2-m-01"); eq(s2ids[1], "s2-p-01"); eq(s2ids[S2TOTAL - 2], "s2-p-02"); eq(s2ids[S2TOTAL - 1], S2FINAL);
     ok(L.isSeasonComplete(st, "s2") && L.isSeasonComplete(st, "s1"));
-    eq(L.currentSeasonId(st), null); eq(L.displaySeasonId(st), "s2");
+    eq(L.currentSeasonId(st), "s3"); eq(L.displaySeasonId(st), "s3");
     const k2 = L.ymd(d);
-    const pc = L.planBrush(st, T(k2 + "T08:00")); ok(!pc.earn && pc.reason === "complete", "兩季集齊後 planBrush = complete");
-    eq(L.recordBrush(st, T(k2 + "T08:00"), T(k2 + "T08:02")).kind, "all-done", "不再抽卡，不當機");
-    eq(L.recordBrush(st, T(k2 + "T14:00"), T(k2 + "T14:02")).kind, "outside");
-    ok(L.songFor(st, "op", Date.UTC(2026,9,23,4)) && L.songFor(st, "op", Date.UTC(2026,9,23,4)).src === "audio/s1_op.m4a" && L.songFor(st, "home", Date.UTC(2026,9,23,4)).src === "audio/s1_home.m4a", "第二季沒有音樂：沿用第一季的歌");
-    eq(L.normalizeState(JSON.parse(JSON.stringify(st))).collected.length, TOTAL + S2TOTAL);
+    const pc = L.planBrush(st, T(k2 + "T08:00"), R); ok(pc.earn && pc.id === "s3-p-01", "下一張是鑽石公主");
+    eq(L.songFor(st, "op", Date.UTC(2026,9,23,4)).src, "audio/s3_gem_op.m4a", "第三季刷牙播片頭曲");
+    eq(L.songFor(st, "home", Date.UTC(2026,9,23,4)).src, "audio/s3_gem_ed.m4a", "第三季首頁播純音樂");
+    eq(L.normalizeState(JSON.parse(JSON.stringify(st))).collected.length, TOTAL + S2TOTAL + 1);
   }
   // 第二季最後一張的 seasonComplete
   { const st = baseS1(); L.applyUnlocks(st, 0); st.collected.push(...s2.filter((i) => i.id !== S2FINAL && i.id !== "s2-m-01").map((i) => ({ id: i.id, t: 0, d: null, s: null })));
     eq(L.collectedIn(st, "s2").length, 73);
     const r = L.recordBrush(st, T("2026-12-01T08:00"), T("2026-12-01T08:02"), rng(3));
-    eq(r.item.id, S2FINAL); eq(r.number, 74); eq(r.seasonComplete, "s2"); eq(r.unlock, null); }
+    eq(r.item.id, S2FINAL); eq(r.number, 74); eq(r.seasonComplete, "s2"); eq(r.unlock && r.unlock.item.id, "s3-m-01"); eq(r.unlock.from.id, "s2-m-20"); }
 
   // 舊進度加項：已集齊舊版 72 張（含妖妖、無公主）→ 補抽陽光、神聖
   { const st = baseS1(); L.applyUnlocks(st, 0);
@@ -649,7 +650,7 @@ console.log("✓ 日子與時段");
     ok(!L.isSeasonComplete(st, "s2"), "缺 2 張公主 → 未集齊");
     const a = L.drawNext(st, rng(1)); eq(a, "s2-p-01", "補陽光公主"); st.collected.push({ id: a, t: 0, d: null, s: null });
     const b = L.drawNext(st, rng(2)); eq(b, "s2-p-02", "補神聖公主"); st.collected.push({ id: b, t: 0, d: null, s: null });
-    eq(L.drawNext(st, rng(3)), null); ok(L.isSeasonComplete(st, "s2")); }
+    eq(L.drawNext(st, rng(3)), "s3-m-01", "第二季集齊後下一張是第三季愛心萌可"); ok(L.isSeasonComplete(st, "s2")); }
 
   // 舊資料：v9 的進度完全不變
   { const v9 = { schema: 2, days: { "2026-09-26": { m: 1, e: 2, mc: "s1-m-01", ec: "s1-p-01", x: 0 } },
@@ -669,14 +670,163 @@ console.log("✓ 日子與時段");
     const noNews = JSON.parse(JSON.stringify(f)); delete noNews.news; assert.deepStrictEqual(L.normalizeState(noNews).collected, f.collected);
   }
   eq(L.songFor(L.emptyState(), "op", Date.UTC(2026,9,23,4)).src, "audio/s1_op.m4a");
-  eq(L.seasonUnlocked(L.emptyState(), "s1"), true); eq(L.seasonUnlocked(L.emptyState(), "s2"), false);
+  eq(L.seasonUnlocked(L.emptyState(), "s1"), true); eq(L.seasonUnlocked(L.emptyState(), "s2"), false); eq(L.seasonUnlocked(L.emptyState(), "s3"), false);
   eq(L.displaySeasonId(L.emptyState()), "s1");
-  console.log("✓ 第二季：74 張（20 萌可 + 2 公主 + 52 劇照）、幸福第 1、陽光第 2、神聖第 73、妖妖最後、第一季集齊後開放並直接送幸福萌可、舊 72 張進度可補公主、兩季集齊後不再抽卡");
+  console.log("✓ 第二季：74 張（20 萌可 + 2 公主 + 52 劇照）、幸福第 1、陽光第 2、神聖第 73、妖妖最後、第一季集齊後開放並直接送幸福萌可、舊 72 張進度可補公主、集齊後開放第三季");
+}
+
+// ---- 第三季《閃亮寶石》（76 張 = 20 萌可 + 4 公主 + 52 劇照）----
+{
+  const s3 = DATA.items.filter((i) => i.season === "s3");
+  const S3 = L.season("s3");
+  const S3TOTAL = 76, S3FINAL = "s3-m-20";
+  const EARLY = ["s3-m-02", "s3-m-03", "s3-m-04"];
+  const PAIRS = { "s3-m-01": "s3-p-01", "s3-m-02": "s3-p-02", "s3-m-03": "s3-p-04", "s3-m-04": "s3-p-03" };
+  eq(L.season("s1").name, "奇妙萌可"); eq(L.season("s2").name, "奇妙萌可第二季"); eq(S3.name, "閃亮寶石");
+  eq(s3.length, S3TOTAL, "第三季 76 張"); eq(S3.total, S3TOTAL); ok(S3.open === true, "第三季 open");
+  eq(s3.filter((i) => i.type === "momoke").length, 20);
+  eq(s3.filter((i) => i.type === "princess").length, 4);
+  eq(s3.filter((i) => i.type === "still").length, 52);
+  eq(new Set(DATA.items.map((i) => i.id)).size, DATA.items.length, "全部 id 不重複");
+  const ms = s3.filter((i) => i.type === "momoke");
+  const names = ["愛心萌可", "笑笑萌可", "信信萌可", "贊贊萌可", "嘻嘻萌可", "弱弱萌可", "願望萌可", "安慰萌可", "躲躲萌可", "淨淨萌可", "美味萌可", "暖暖萌可", "筆記萌可", "公主萌可", "雙雙萌可", "分享萌可", "雕刻萌可", "芭蕾萌可", "神奇萌可", "奉獻萌可"];
+  assert.deepStrictEqual(ms.map((m) => m.name), names, "第三季萌可名稱與次序");
+  assert.deepStrictEqual(ms.map((m) => m.id), names.map((_, i) => "s3-m-" + String(i + 1).padStart(2, "0")));
+  eq(ms.filter((m) => m.category === "royal").length, 4);
+  eq(ms.filter((m) => m.category === "gem").length, 15, "15 寶石萌可");
+  eq(ms[19].category, "villain"); eq(ms[19].id, S3FINAL);
+  const BLURB = {
+    "00_aixin_gem.jpg": "本季換成豎琴造型，善良又重感情，句尾「啾」！",
+    "01_xiaoxiao.jpg": "代表笑容，拿著禮炮煙花，總是笑眯眯，句尾「笑笑」！",
+    "02_xinxin.jpg": "代表信任，撐著雨傘，憨厚純真，句尾「真的」！",
+    "03_zanzan.jpg": "代表善良，拿著梳子，親切和藹，句尾「贊贊」！",
+    "04_xixi.jpg": "愛惡作劇，揮著羽毛扇子。",
+    "05_ruoruo.jpg": "容易覺得痛，貼著創可貼。",
+    "06_yuanwang.jpg": "會實現願望，提著神燈。",
+    "07_anwei.jpg": "最愛安慰別人，裹著毯子。",
+    "08_duoduo.jpg": "很膽小，抱著手風琴。",
+    "09_jingjing.jpg": "最愛整潔，拿著掃帚。",
+    "10_meiwei.jpg": "很懂品味，拿著湯勺。",
+    "11_nuannuan.jpg": "帶來温暖，拿著編織針。",
+    "12_biji.jpg": "做事很慎密，拿著筆記本和筆。",
+    "13_gongzhu.jpg": "舉止優雅，拿著權杖。",
+    "14_shuangshuang.jpg": "喜歡成雙成對，拿著響板。",
+    "15_fenxiang.jpg": "最愛分享，提著禮物盒。",
+    "16_diaoke.jpg": "很有創造力，拿著錘子。",
+    "17_balei.jpg": "最愛芭蕾舞，捧著水晶球。",
+    "18_shenqi.jpg": "很有英雄氣概，拿著迴旋鏢。",
+    "19_fengxian.jpg": "戴面具時是假面萌可，很疼愛珍珠，句尾「棒棒」！",
+    "01_zuanshi.jpg": "樂美和愛心萌可一起變身成鑽石公主！",
+    "02_shuijing.jpg": "樂美和笑笑萌可一起變身成水晶公主！",
+    "03_feicui.jpg": "樂美和贊贊萌可一起變身成翡翠公主！",
+    "04_lanshiba.jpg": "樂美和信信萌可一起變身成藍寶石公主！",
+  };
+  ms.forEach((m) => { eq(m.blurb, BLURB[require("path").basename(m.img)], "blurb " + m.img); ok(m.blurb.length > 0, "blurb 非空 " + m.id); });
+  const ps = s3.filter((i) => i.type === "princess");
+  ps.forEach((p) => { eq(p.blurb, BLURB[require("path").basename(p.img)], "公主 blurb " + p.name); ok(p.blurb.length > 0); });
+  eq(ps.map((p) => p.name).join(","), "鑽石公主,水晶公主,翡翠公主,藍寶石公主");
+  Object.entries(PAIRS).forEach(([royal, princess]) => { eq(L.byId[royal].princess, princess); eq(L.byId[princess].royal, royal); });
+  const stl = s3.filter((i) => i.type === "still");
+  const efiles = []; for (let e = 1; e <= 26; e++) for (const ab of ["a", "b"]) efiles.push("ep" + String(e).padStart(2, "0") + "_" + ab + ".jpg");
+  assert.deepStrictEqual(stl.map((x) => require("path").basename(x.img)), efiles, "第三季劇照次序");
+  const stillMan = JSON.parse(fs.readFileSync(require("path").join(__dirname, "..", "img/s3_gem_stills/manifest.json"), "utf8"));
+  stl.forEach((x) => { eq(x.blurb, "第" + x.ep + "集〈" + stillMan.episode_titles_zh_hant[String(x.ep)] + "〉", x.id); ok(/^img\/s3_gem_stills\//.test(x.img)); });
+  s3.forEach((i) => ok(i.img && fs.existsSync(require("path").join(__dirname, "..", i.img)), "圖片存在 " + i.img));
+  eq(S3.first[0], "s3-m-01"); eq(S3.finalItem, S3FINAL); eq(S3.earlyWindow, 24);
+  eq(S3.transform.from, "s2-m-20"); eq(S3.transform.to, "s3-m-01");
+  eq(S3.music.op.src, "audio/s3_gem_op.m4a"); eq(S3.music.op.title, "閃亮寶石"); eq(S3.music.op.duration, 55.8);
+  eq(S3.music.home.src, "audio/s3_gem_ed.m4a"); eq(S3.music.home.instrumental, true); eq(S3.music.home.duration, 20.0);
+  ok(fs.existsSync(require("path").join(__dirname, "..", S3.music.op.src)));
+  ok(fs.existsSync(require("path").join(__dirname, "..", S3.music.home.src)));
+
+  const baseS2 = () => {
+    const st = L.emptyState();
+    DATA.items.filter((it) => it.season === "s1" || it.season === "s2").forEach((it) => st.collected.push({ id: it.id, t: 0, d: "2026-12-01", s: null }));
+    return st;
+  };
+  const checkS3 = (seq, label) => {
+    eq(seq.length, S3TOTAL, label + " 共 76 張");
+    eq(new Set(seq).size, S3TOTAL, label + " 不重複");
+    eq(seq[0], "s3-m-01", label + " 第 1 張愛心萌可");
+    eq(seq[1], "s3-p-01", label + " 第 2 張鑽石公主");
+    eq(seq[S3TOTAL - 1], S3FINAL, label + " 最後是奉獻萌可");
+    ok(seq.every((x) => L.byId[x].season === "s3"), label + " 只有第三季");
+    Object.entries(PAIRS).forEach(([royal, princess]) => eq(seq[seq.indexOf(royal) + 1], princess, label + " " + L.byId[royal].name + " 之後緊接公主"));
+    seq.forEach((id, i) => { if (L.byId[id].type === "princess") eq(seq[i - 1], L.byId[id].royal, label + " 公主前面是皇室萌可"); });
+    const lastEarly = Math.max.apply(null, EARLY.map((id) => seq.indexOf(id)));
+    seq.forEach((id, i) => { if (L.byId[id].category === "gem") ok(i > lastEarly, label + " 寶石萌可在早期皇室之後"); });
+    EARLY.forEach((id) => ok(seq.indexOf(PAIRS[id]) < S3.earlyWindow, label + " " + L.byId[id].name + " 的公主在第 " + S3.earlyWindow + " 張前"));
+    ok(seq.indexOf(S3FINAL) === S3TOTAL - 1);
+  };
+  let earlyPos = 0, earlyN = 0, gemPos = 0, gemN = 0, obsStill = 0, expStill = 0;
+  const RUNS = 2000;
+  for (let run = 0; run < RUNS; run++) {
+    const R = rng(700000 + run);
+    const st = baseS2();
+    eq(L.currentSeasonId(st), "s3", "第二季集齊 → 目前第三季");
+    ok(!L.collectedSet(st)["s3-m-01"]);
+    eq(L.applyUnlocks(st, T("2026-12-02T08:00")).length, 1);
+    eq(st.collected[st.collected.length - 1].id, "s3-m-01");
+    eq(L.applyUnlocks(st, 0).length, 0, "只送一次");
+    const seq = ["s3-m-01"];
+    let id;
+    while (L.collectedIn(st, "s3").length < S3TOTAL && (id = L.drawNext(st, R))) {
+      st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); st.pending = null;
+      ok(seq.length <= S3TOTAL, "不可多於 76 張");
+    }
+    checkS3(seq, "模擬 " + run);
+    eq(L.currentSeasonId(st), null, "三季集齊後不再抽");
+    EARLY.forEach((id) => { earlyPos += seq.indexOf(id) + 1; earlyN++; });
+    seq.forEach((id, i) => { if (L.byId[id].category === "gem") { gemPos += i + 1; gemN++; } });
+    const earlyIds = new Set(Object.keys(PAIRS).concat(Object.values(PAIRS)));
+    let seen = 0, cut = -1;
+    for (let i = 0; i < seq.length; i++) { if (earlyIds.has(seq[i])) seen++; if (seen === earlyIds.size) { cut = i; break; } }
+    const usedStill = seq.slice(0, cut + 1).filter((id) => L.byId[id].type === "still").length;
+    const leftStill = 52 - usedStill, leftGem = 15;
+    expStill += leftStill / (leftStill + leftGem);
+    if (L.byId[seq[cut + 1]].type === "still") obsStill++;
+    ok(cut + 1 < S3TOTAL - 1, "中段還有卡");
+  }
+  ok(earlyPos / earlyN < 14, "笑笑／信信／贊贊平均偏早 (" + (earlyPos / earlyN).toFixed(1) + ")");
+  const gavg = gemPos / gemN;
+  ok(gavg > 24 && gavg < 70, "寶石萌可落在中段 (" + gavg.toFixed(1) + ")");
+  ok(Math.abs(obsStill / RUNS - expStill / RUNS) < 0.05, "早期皇室之後劇照與寶石萌可平均混合");
+  for (const fixed of [0, 0.999999, 0.5]) {
+    const st = baseS2(); L.applyUnlocks(st, 0);
+    const seq = ["s3-m-01"]; let id;
+    while (L.collectedIn(st, "s3").length < S3TOTAL && (id = L.drawNext(st, () => fixed))) { st.collected.push({ id, t: 0, d: null, s: null }); seq.push(id); }
+    checkS3(seq, "固定亂數 " + fixed);
+  }
+  { const st = baseS2(); st.collected = st.collected.filter((c) => c.id !== "s2-m-20");
+    eq(L.collectedIn(st, "s2").length, 73); ok(!L.seasonUnlocked(st, "s3"), "73/74：第三季未開放");
+    eq(L.applyUnlocks(st, 0).length, 0); eq(L.currentSeasonId(st), "s2"); eq(L.drawNext(st, rng(1)), "s2-m-20", "還差妖妖萌可"); }
+  { const prior = DATA.items.filter((it) => it.season === "s1" || it.season === "s2").map((it) => it.id);
+    const saved = { schema: 2, days: { "2026-11-01": { m: 1, e: 2, mc: "s1-m-01", ec: "s2-m-02", x: 0 } }, pending: null, collected: prior.map((id) => ({ id, t: 1, d: "2026-11-01", s: null })) };
+    const n = L.normalizeState(JSON.parse(JSON.stringify(saved)));
+    assert.deepStrictEqual(n.collected.map((c) => c.id), prior, "舊進度原封不動");
+    eq(L.applyUnlocks(n, T("2026-12-03T08:00")).length, 1);
+    eq(n.collected[n.collected.length - 1].id, "s3-m-01"); eq(n.news[0], "s3");
+    assert.deepStrictEqual(n.collected.slice(0, prior.length).map((c) => c.id), prior, "贈禮只加在後面");
+    eq(n.days["2026-11-01"].mc, "s1-m-01"); eq(n.days["2026-11-01"].ec, "s2-m-02"); }
+  { const st = baseS2(); L.applyUnlocks(st, 0);
+    s3.filter((i) => i.id !== S3FINAL && i.id !== "s3-m-01").forEach((i) => st.collected.push({ id: i.id, t: 0, d: null, s: null }));
+    eq(L.collectedIn(st, "s3").length, 75);
+    const r = L.recordBrush(st, T("2027-02-01T08:00"), T("2027-02-01T08:02"), rng(9));
+    eq(r.item.id, S3FINAL); eq(r.number, 76); eq(r.seasonComplete, "s3"); eq(r.unlock, null);
+    const pc = L.planBrush(st, T("2027-02-01T20:00")); ok(!pc.earn && pc.reason === "complete");
+    eq(L.recordBrush(st, T("2027-02-01T20:00"), T("2027-02-01T20:02")).kind, "all-done");
+    const hw = Date.UTC(2026, 9, 28, 4);
+    eq(L.songFor(st, "op", hw).src, "audio/halloween.m4a", "萬聖節覆寫刷牙歌");
+    eq(L.songFor(st, "home", hw).src, "audio/halloween.m4a", "萬聖節覆寫首頁歌");
+    eq(L.songFor(st, "home", hw).season, "halloween");
+    eq(L.songFor(st, "op", Date.UTC(2026, 9, 23, 4)).src, "audio/s3_gem_op.m4a");
+    eq(L.songFor(st, "home", Date.UTC(2026, 9, 23, 4)).src, "audio/s3_gem_ed.m4a"); }
+  console.log("✓ 第三季：76 張、愛心第 1、鑽石第 2、笑笑／信信／贊贊偏早且公主緊接、寶石萌可中段、劇照穿插、奉獻最後、第二季集齊後贈送、舊進度保留、萬聖節仍覆寫");
 }
 
 // App 版本：主頁底部的小字（data.js 的 version）必須和 sw.js 的 VERSION 相同
 {
-  const swSrc = fs.readFileSync(path.join(__dirname, "..", "sw.js"), "utf8");
+  const swSrc = fs.readFileSync(require("path").join(__dirname, "..", "sw.js"), "utf8");
   const m = /var VERSION = "(v\d+)"/.exec(swSrc);
   ok(m, "sw.js 有 VERSION");
   eq(DATA.version, m[1], "data.js version 必須等於 sw.js VERSION");

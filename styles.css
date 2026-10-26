@@ -118,11 +118,11 @@ img { -webkit-user-drag: none; }
 
 .collect-bar {
   width: 100%; margin: 12px 0 6px; padding: 10px 16px; border-radius: 22px; background: #fff;
-  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 10px; row-gap: 6px;
+  display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 10px; row-gap: 6px;
   box-shadow: 0 4px 12px rgba(155,107,255,.12); text-align: left;
 }
-.collect-label { font-size: 19px; font-weight: 700; color: var(--ink-soft); }
-.collect-count { font-size: 26px; font-weight: 900; color: var(--pink-d); justify-self: end; }
+.collect-label { font-size: 17px; font-weight: 700; color: var(--ink-soft); line-height: 1.25; }
+.collect-count { font-size: 26px; font-weight: 900; color: var(--pink-d); justify-self: end; white-space: nowrap; }
 .collect-track { grid-column: 1 / 3; height: 14px; border-radius: 7px; background: #f1e6ff; overflow: hidden; }
 .collect-track i { display: block; height: 100%; width: 0; border-radius: 7px; background: linear-gradient(90deg, var(--pink), var(--purple)); transition: width .6s ease; }
 .big-buttons { width: 100%; margin-top: auto; padding-top: 6px; }
@@ -288,8 +288,8 @@ img { -webkit-user-drag: none; }
 .head-spacer { min-width: 92px; }
 
 /* ---------- 畫冊 ---------- */
-.season-bar { width: 100%; display: flex; gap: 8px; margin-bottom: 10px; }
-.season-chip { flex: 1; text-align: center; padding: 8px 6px; min-height: 44px; border-radius: 16px; font-size: 17px; font-weight: 800; background: #fff; color: var(--pink-d); box-shadow: 0 2px 6px rgba(155,107,255,.12); }
+.season-bar { width: 100%; display: flex; gap: 6px; margin-bottom: 10px; }
+.season-chip { flex: 1; text-align: center; padding: 6px 4px; min-height: 44px; border-radius: 16px; font-size: 13px; line-height: 1.25; font-weight: 800; white-space: normal; background: #fff; color: var(--pink-d); box-shadow: 0 2px 6px rgba(155,107,255,.12); }
 .season-chip.on { background: var(--pink); color: #fff; box-shadow: none; }
 .season-chip.locked { background: #efe7f7; color: #a996bd; box-shadow: none; cursor: default; }
 .tabs { width: 100%; display: flex; gap: 6px; background: #fff; border-radius: 26px; padding: 6px; box-shadow: 0 3px 10px rgba(155,107,255,.15); margin-bottom: 14px; }

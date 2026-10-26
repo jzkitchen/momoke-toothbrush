@@ -7,7 +7,7 @@
   var ZONES = ["上排左邊", "上排右邊", "下排左邊", "下排右邊"];
   var CHEERS = ["加油！", "刷得真好！", "慢慢刷乾淨！", "快完成了！"];
   var WEEKDAYS = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-  var TYPE_LABEL = { royal: "皇室萌可", magic: "魔方萌可", villain: "反派萌可", princess: "公主", still: "劇照" };
+  var TYPE_LABEL = { royal: "皇室萌可", magic: "魔方萌可", gem: "寶石萌可", villain: "反派萌可", princess: "公主", still: "劇照" };
 
   // ---------- 測試用隱藏參數（只在 ?test=1 時生效，介面不會顯示） ----------
   var params = new URLSearchParams(location.search);
@@ -170,8 +170,9 @@
   }
   function hintText(ts, day, complete, slotNow, h) {
     if (complete) {
-      if (L.isSeasonComplete(state, "s2")) return "恭喜集齊第二季！每天也要好好刷牙！";
-      if (L.isSeasonComplete(state, "s1")) return "恭喜集齊第一季！每天也要好好刷牙！";
+      var last = null;
+      DATA.seasons.forEach(function (s) { if (L.isSeasonComplete(state, s.id)) last = s; });
+      if (last && last.completeTitle) return last.completeTitle.replace(/！$/, "！每天也要好好刷牙！");
       return "每天也要好好刷牙！";
     }
     var cards = L.cardsOnDay(day);
@@ -944,8 +945,8 @@
   $("unlock-album").addEventListener("click", function () { go("album"); });
 
   // ---------- 畫冊 ----------
-  // 上方「第一季 / 第二季」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算（沒有該類型卡片的分頁會隱藏；第二季有 2 張公主）。
-  // 第二季未開放（第一季未集齊）時，第二季顯示「🔒 第二季 敬請期待」，不能點。
+  // 上方「奇妙萌可 / 奇妙萌可第二季 / 閃亮寶石」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算。
+  // 未開放的季度顯示「🔒 … 敬請期待」，不能點。
   var albumTab = "momoke";
   var albumSeason = "s1";
   var TAB_NAMES = { momoke: "萌可", princess: "公主", still: "劇照" };
@@ -953,7 +954,7 @@
   function renderAlbum() {
     var have = L.collectedSet(state);
     if (!L.seasonUnlocked(state, albumSeason)) albumSeason = "s1";
-    var chips = [["album-season", "s1"], ["album-season-2", "s2"]];
+    var chips = [["album-season", "s1"], ["album-season-2", "s2"], ["album-season-3", "s3"]];
     chips.forEach(function (c) {
       var sid = c[1], chip = $(c[0]), open = L.seasonUnlocked(state, sid), sdef = L.season(sid);
       chip.classList.toggle("on", open && sid === albumSeason);
@@ -992,7 +993,7 @@
       grid.appendChild(c);
     });
   }
-  ["album-season", "album-season-2"].forEach(function (id) {
+  ["album-season", "album-season-2", "album-season-3"].forEach(function (id) {
     $(id).addEventListener("click", function () {
       var sid = this.getAttribute("data-season");
       if (!L.seasonUnlocked(state, sid)) return;
@@ -1114,7 +1115,10 @@
   function openParent() {
     var days = Object.keys(state.days).filter(function (k) { var d = state.days[k]; return d.m || d.e; }).length;
     var info = "已收集 " + L.collectedIn(state, "s1").length + " / " + seasonTotal("s1") + " 張卡片";
-    if (L.seasonUnlocked(state, "s2")) info += "（第二季 " + L.collectedIn(state, "s2").length + " / " + seasonTotal("s2") + " 張）";
+    DATA.seasons.forEach(function (s) {
+      if (s.id === "s1" || !L.seasonUnlocked(state, s.id)) return;
+      info += "（" + s.name + " " + L.collectedIn(state, s.id).length + " / " + seasonTotal(s.id) + " 張）";
+    });
     $("parent-info").textContent = info + "，共有 " + days + " 天的刷牙紀錄。";
     renderMusicToggle();
     renderHomeMusicToggle();

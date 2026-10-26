@@ -1,0 +1,745 @@
+{
+ "app_season": 3,
+ "album_folder": "s3_gem",
+ "title": "奇妙萌可 App 第3季角色卡（閃亮寶石／Twinkle Catch）",
+ "title_baike": "奇妙萌可之闪亮宝石",
+ "mapping": "App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2)",
+ "mapping_confirmed": "2026-10-26 user confirmed",
+ "do_not_touch": [
+  "/workspace/momoke/images/s3/",
+  "/workspace/momoke/images/s3_princess/"
+ ],
+ "order_choice": "00 愛心本季造型 → 01–03 笑笑／信信／贊贊 → 04–18 百科寶石01–15 → 19 奉獻。不含珍珠、假面。",
+ "count": 20,
+ "generated": "2026-10-26 Asia/Hong_Kong",
+ "baike": "https://baike.baidu.com/item/奇妙萌可之闪亮宝石/62981049",
+ "baike_main": "https://baike.baidu.com/item/奇妙萌可/58125019",
+ "fandom_list": "https://catchteenieping.fandom.com/wiki/List_of_Teeniepings/Season_2",
+ "process_note": "Official fandom transparent renders; alpha-trim; white 1080×1080; fit ≤960px; never upscale; JPEG; no AI edit. Momoke raw reused from game_pack/images_s1_s6/s3 (already official fandom renders) then reprocessed.",
+ "items": [
+  {
+   "order": 0,
+   "name": "愛心萌可",
+   "baike_name": "爱心萌可",
+   "en_name": "Dia Heartsping",
+   "category": "皇室（本季豎琴／鑽石造型）",
+   "file": "00_aixin_gem.jpg",
+   "raw": "Heartsping_S2_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/5/53/Heartsping_S2_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Heartsping_S2_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     959,
+     1024
+    ],
+    "trimmed_size": [
+     959,
+     1024
+    ],
+    "fitted_size": [
+     899,
+     960
+    ],
+    "scale": 0.9375,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科第三季新增豎琴；變身鑽石公主。與 S1 鏡子造型分開建卡。源：game_pack 已收 Heartsping_S2_Render_1。"
+  },
+  {
+   "order": 1,
+   "name": "笑笑萌可",
+   "baike_name": "笑笑萌可",
+   "en_name": "Teeheeping",
+   "category": "皇室萌可（候補生）",
+   "file": "01_xiaoxiao.jpg",
+   "raw": "Teeheeping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/9/9a/Teeheeping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Teeheeping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1024,
+     811
+    ],
+    "trimmed_size": [
+     1024,
+     811
+    ],
+    "fitted_size": [
+     960,
+     760
+    ],
+    "scale": 0.9375,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 變身水晶公主（fandom Princess Ruby）。"
+  },
+  {
+   "order": 2,
+   "name": "信信萌可",
+   "baike_name": "信信萌可",
+   "en_name": "Trustping",
+   "category": "皇室萌可（候補生）",
+   "file": "02_xinxin.jpg",
+   "raw": "Trustping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/d/d9/Trustping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Trustping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1024,
+     959
+    ],
+    "trimmed_size": [
+     1024,
+     959
+    ],
+    "fitted_size": [
+     960,
+     899
+    ],
+    "scale": 0.9375,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 變身藍寶石公主。男。"
+  },
+  {
+   "order": 3,
+   "name": "贊贊萌可",
+   "baike_name": "赞赞萌可",
+   "en_name": "Joahping",
+   "category": "皇室萌可（候補生）",
+   "file": "03_zanzan.jpg",
+   "raw": "Joahping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/1/1e/Joahping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Joahping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     780,
+     1024
+    ],
+    "trimmed_size": [
+     780,
+     1024
+    ],
+    "fitted_size": [
+     731,
+     960
+    ],
+    "scale": 0.9375,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 變身翡翠公主。"
+  },
+  {
+   "order": 4,
+   "name": "嘻嘻萌可",
+   "baike_name": "嘻嘻萌可",
+   "en_name": "Tickleping",
+   "category": "寶石萌可",
+   "file": "04_xixi.jpg",
+   "raw": "Tickleping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/c/c1/Tickleping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Tickleping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     989,
+     995
+    ],
+    "trimmed_size": [
+     987,
+     995
+    ],
+    "fitted_size": [
+     952,
+     960
+    ],
+    "scale": 0.9648,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 01；黃水晶。"
+  },
+  {
+   "order": 5,
+   "name": "弱弱萌可",
+   "baike_name": "弱弱萌可",
+   "en_name": "Owwping",
+   "category": "寶石萌可",
+   "file": "05_ruoruo.jpg",
+   "raw": "Owwping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/f/fa/Owwping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Owwping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     599,
+     651
+    ],
+    "trimmed_size": [
+     598,
+     651
+    ],
+    "fitted_size": [
+     598,
+     651
+    ],
+    "scale": 1.0,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 02；石榴石。 Modest source size 599×651 (not upscaled)."
+  },
+  {
+   "order": 6,
+   "name": "願望萌可",
+   "baike_name": "愿望萌可",
+   "en_name": "Wishping",
+   "category": "寶石萌可",
+   "file": "06_yuanwang.jpg",
+   "raw": "Wishping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/2/2d/Wishping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Wishping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     982,
+     979
+    ],
+    "trimmed_size": [
+     981,
+     979
+    ],
+    "fitted_size": [
+     960,
+     958
+    ],
+    "scale": 0.9786,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 03；尖晶石。"
+  },
+  {
+   "order": 7,
+   "name": "安慰萌可",
+   "baike_name": "安慰萌可",
+   "en_name": "Patping",
+   "category": "寶石萌可",
+   "file": "07_anwei.jpg",
+   "raw": "Patping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/d/d5/Patping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Patping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     988,
+     851
+    ],
+    "trimmed_size": [
+     988,
+     851
+    ],
+    "fitted_size": [
+     960,
+     827
+    ],
+    "scale": 0.9717,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 04；綠玉。"
+  },
+  {
+   "order": 8,
+   "name": "躲躲萌可",
+   "baike_name": "躲躲萌可",
+   "en_name": "Timidping",
+   "category": "寶石萌可",
+   "file": "08_duoduo.jpg",
+   "raw": "Timidping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/a/a8/Timidping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Timidping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     950,
+     1231
+    ],
+    "trimmed_size": [
+     950,
+     1231
+    ],
+    "fitted_size": [
+     741,
+     960
+    ],
+    "scale": 0.7799,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 05；坦桑石。"
+  },
+  {
+   "order": 9,
+   "name": "淨淨萌可",
+   "baike_name": "净净萌可",
+   "en_name": "Tidyping",
+   "category": "寶石萌可",
+   "file": "09_jingjing.jpg",
+   "raw": "Tidyping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/b/ba/Tidyping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Tidyping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1380,
+     1580
+    ],
+    "trimmed_size": [
+     1380,
+     1580
+    ],
+    "fitted_size": [
+     838,
+     960
+    ],
+    "scale": 0.6076,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 06；橄欖石。"
+  },
+  {
+   "order": 10,
+   "name": "美味萌可",
+   "baike_name": "美味萌可",
+   "en_name": "Yummyping",
+   "category": "寶石萌可",
+   "file": "10_meiwei.jpg",
+   "raw": "Yummyping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/1/19/Yummyping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Yummyping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1109,
+     1215
+    ],
+    "trimmed_size": [
+     1109,
+     1215
+    ],
+    "fitted_size": [
+     876,
+     960
+    ],
+    "scale": 0.7901,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 07；珊瑚石。"
+  },
+  {
+   "order": 11,
+   "name": "暖暖萌可",
+   "baike_name": "暖暖萌可",
+   "en_name": "Cozyping",
+   "category": "寶石萌可",
+   "file": "11_nuannuan.jpg",
+   "raw": "Cozyping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/2/2b/Cozyping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Cozyping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     985,
+     919
+    ],
+    "trimmed_size": [
+     983,
+     918
+    ],
+    "fitted_size": [
+     960,
+     897
+    ],
+    "scale": 0.9766,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 08；月光石。"
+  },
+  {
+   "order": 12,
+   "name": "筆記萌可",
+   "baike_name": "笔记萌可",
+   "en_name": "Memoping",
+   "category": "寶石萌可",
+   "file": "12_biji.jpg",
+   "raw": "Memoping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/c/c3/Memoping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Memoping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1743,
+     1739
+    ],
+    "trimmed_size": [
+     1743,
+     1739
+    ],
+    "fitted_size": [
+     960,
+     958
+    ],
+    "scale": 0.5508,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 09；綠松石。"
+  },
+  {
+   "order": 13,
+   "name": "公主萌可",
+   "baike_name": "公主萌可",
+   "en_name": "Ladyping",
+   "category": "寶石萌可",
+   "file": "13_gongzhu.jpg",
+   "raw": "Ladyping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/9/96/Ladyping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Ladyping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     985,
+     1501
+    ],
+    "trimmed_size": [
+     985,
+     1501
+    ],
+    "fitted_size": [
+     630,
+     960
+    ],
+    "scale": 0.6396,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 10；亞歷山大變石。"
+  },
+  {
+   "order": 14,
+   "name": "雙雙萌可",
+   "baike_name": "双双萌可",
+   "en_name": "Buddyping",
+   "category": "寶石萌可",
+   "file": "14_shuangshuang.jpg",
+   "raw": "Buddyping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/0/08/Buddyping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Buddyping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     987,
+     1096
+    ],
+    "trimmed_size": [
+     986,
+     1096
+    ],
+    "fitted_size": [
+     864,
+     960
+    ],
+    "scale": 0.8759,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 11；藍水晶（百科；fandom Aquamarine）。"
+  },
+  {
+   "order": 15,
+   "name": "分享萌可",
+   "baike_name": "分享萌可",
+   "en_name": "Giftping",
+   "category": "寶石萌可",
+   "file": "15_fenxiang.jpg",
+   "raw": "Giftping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/e/e3/Giftping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Giftping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1106,
+     1243
+    ],
+    "trimmed_size": [
+     1106,
+     1243
+    ],
+    "fitted_size": [
+     854,
+     960
+    ],
+    "scale": 0.7723,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 12；黃玉。"
+  },
+  {
+   "order": 16,
+   "name": "雕刻萌可",
+   "baike_name": "雕刻萌可",
+   "en_name": "Sculptping",
+   "category": "寶石萌可",
+   "file": "16_diaoke.jpg",
+   "raw": "Sculptping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/a/ae/Sculptping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Sculptping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     939,
+     1072
+    ],
+    "trimmed_size": [
+     939,
+     1072
+    ],
+    "fitted_size": [
+     841,
+     960
+    ],
+    "scale": 0.8955,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 13；紫水晶。"
+  },
+  {
+   "order": 17,
+   "name": "芭蕾萌可",
+   "baike_name": "芭蕾萌可",
+   "en_name": "Balletping",
+   "category": "寶石萌可",
+   "file": "17_balei.jpg",
+   "raw": "Balletping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/0/05/Balletping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Balletping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     632,
+     868
+    ],
+    "trimmed_size": [
+     631,
+     867
+    ],
+    "fitted_size": [
+     631,
+     867
+    ],
+    "scale": 1.0,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 14；芙蓉石。 Modest source size 632×868 (not upscaled)."
+  },
+  {
+   "order": 18,
+   "name": "神奇萌可",
+   "baike_name": "神奇萌可",
+   "en_name": "Wonderping",
+   "category": "寶石萌可",
+   "file": "18_shenqi.jpg",
+   "raw": "Wonderping_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/3/32/Wonderping_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Wonderping_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     991,
+     810
+    ],
+    "trimmed_size": [
+     991,
+     810
+    ],
+    "fitted_size": [
+     960,
+     785
+    ],
+    "scale": 0.9687,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 百科寶石序 15；青金石。"
+  },
+  {
+   "order": 19,
+   "name": "奉獻萌可",
+   "baike_name": "奉献萌可",
+   "en_name": "Onlyping",
+   "category": "反派萌可（後改正派）",
+   "file": "19_fengxian.jpg",
+   "raw": "Onlyping_S2_Render_1.png",
+   "image_url": "https://static.wikia.nocookie.net/catchteeniepin/images/a/aa/Onlyping_S2_Render_1.png/revision/latest",
+   "source_page": "https://catchteenieping.fandom.com/wiki/File:Onlyping_S2_Render_1.png",
+   "reused_from_game_pack": "/workspace/momoke/game_pack/images_s1_s6/s3/ (official transparent; reprocessed)",
+   "is_single_character": true,
+   "background": "clean",
+   "cropped": false,
+   "status": "required",
+   "process": {
+    "source_size": [
+     1015,
+     1030
+    ],
+    "trimmed_size": [
+     1015,
+     1030
+    ],
+    "fitted_size": [
+     946,
+     960
+    ],
+    "scale": 0.932,
+    "output_size": [
+     1080,
+     1080
+    ]
+   },
+   "notes": "Official transparent 3D render from Catch! Teenieping Wiki (fandom); alpha-trimmed, padded onto white 1080x1080 (character fitted in 960px box, never upscaled), no other edits. App S3 album s3_gem = Baike 第三季《奇妙萌可之闪亮宝石》= Korean Twinkle Catch! Teenieping (S2). 黑珍珠；假面萌可為其面具形態，不另開卡。韓 S2／百科第三季造型。"
+  }
+ ],
+ "skipped": [
+  "珍珠／Jenny（人類；產品確認不含）",
+  "假面萌可／Maskping（奉獻面具形態，非獨立卡）"
+ ]
+}
