@@ -288,6 +288,8 @@ img { -webkit-user-drag: none; }
 .head-spacer { min-width: 92px; }
 
 /* ---------- 畫冊 ---------- */
+.uat-banner { width: 100%; margin: 0 0 10px; padding: 8px 10px; border-radius: 14px; background: #fff6e4; color: var(--ink); font-size: 14px; font-weight: 700; line-height: 1.45; text-align: center; }
+.uat-banner button { display: inline-block; margin-left: 6px; padding: 4px 10px; min-height: 36px; border-radius: 12px; background: var(--purple); color: #fff; font-weight: 800; font-size: 14px; vertical-align: middle; }
 .season-bar { width: 100%; display: flex; gap: 6px; margin-bottom: 10px; }
 .season-chip { flex: 1; text-align: center; padding: 6px 4px; min-height: 44px; border-radius: 16px; font-size: 13px; line-height: 1.25; font-weight: 800; white-space: normal; background: #fff; color: var(--pink-d); box-shadow: 0 2px 6px rgba(155,107,255,.12); }
 .season-chip.on { background: var(--pink); color: #fff; box-shadow: none; }

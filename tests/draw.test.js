@@ -833,4 +833,49 @@ console.log("✓ 日子與時段");
   ok(/^v\d+$/.test(DATA.version), "版本格式 vN");
   console.log("✓ 版本標籤：data.js version = sw.js VERSION = " + DATA.version);
 }
+
+// 家長預覽 ?uat=1：只放寬畫冊翻看，不改收集進度
+{
+  eq(L.isUatMode(""), false);
+  eq(L.isUatMode("?test=1"), false);
+  eq(L.isUatMode("?uat=0"), false);
+  eq(L.isUatMode("?uat=2"), false);
+  eq(L.isUatMode("?uat="), false);
+  eq(L.isUatMode("?preview=1"), false);
+  eq(L.isUatMode("?uat=1"), true);
+  eq(L.isUatMode("?test=1&uat=1"), true);
+  eq(L.isUatMode("https://jzkitchen.github.io/momoke-toothbrush/?uat=1"), true);
+  eq(L.isUatMode("https://jzkitchen.github.io/momoke-toothbrush/?uat=1#home"), true);
+  const st = L.emptyState();
+  const before = JSON.stringify(st);
+  eq(L.seasonUnlocked(st, "s2"), false);
+  eq(L.seasonUnlocked(st, "s3"), false);
+  eq(L.albumSeasonOpen(st, "s2", false), false);
+  eq(L.albumSeasonOpen(st, "s3", false), false);
+  eq(L.albumSeasonOpen(st, "s1", true), true);
+  eq(L.albumSeasonOpen(st, "s2", true), true);
+  eq(L.albumSeasonOpen(st, "s3", true), true);
+  const locked = L.albumView(st, "s3", false);
+  eq(locked.open, false);
+  eq(locked.items.length, 0, "未預覽時第三季畫冊不列出卡片");
+  const preview = L.albumView(st, "s3", true);
+  eq(preview.open, true);
+  eq(preview.items.length, 76, "預覽列出第三季全部 76 張");
+  ok(preview.items.every((row) => row.revealed && !row.collected), "預覽看得到圖，但都算未收集");
+  const types = { momoke: 0, princess: 0, still: 0 };
+  preview.items.forEach((row) => { types[row.type]++; });
+  eq(types.momoke, 20); eq(types.princess, 4); eq(types.still, 52);
+  eq(JSON.stringify(st), before, "albumView / albumSeasonOpen 不改 state");
+  eq(L.seasonUnlocked(st, "s3"), false, "預覽沒有真的解鎖第三季");
+  st.collected.push({ id: "s1-m-01", t: 0, d: null, s: null });
+  const mixed = L.albumView(st, "s1", false);
+  const heart = mixed.items.find((row) => row.id === "s1-m-01");
+  const other = mixed.items.find((row) => row.id === "s1-m-02");
+  eq(heart.collected, true); eq(heart.revealed, true);
+  eq(other.collected, false); eq(other.revealed, false, "平常未收集的卡仍然蓋住");
+  const mixedUat = L.albumView(st, "s1", true);
+  eq(mixedUat.items.filter((row) => row.revealed).length, 81);
+  eq(mixedUat.items.filter((row) => row.collected).length, 1, "預覽不把未收集的卡算成已收集");
+  console.log("✓ 家長預覽 ?uat=1：可翻看全部季度和卡片，不改收集進度");
+}
 console.log(`全部測試通過（${checks} 項斷言）`);

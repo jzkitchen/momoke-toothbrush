@@ -335,6 +335,17 @@ uv venv /workspace/.pwvenv && uv pip install --python /workspace/.pwvenv playwri
 - `?test=1&now=2026-09-26T08:00` 假設現在時間（本地時間，時鐘會從這個時間繼續走）
 - 可合併：`?test=1&speed=60&now=2026-09-26T21:00`
 
+## 家長預覽（`?uat=1`）
+
+在網址加上 `uat=1` 可以翻看**全部季度、全部卡片**（包括未開放、尚未收集的），方便檢查圖畫，不用先刷牙集齊。例如：
+
+`https://jzkitchen.github.io/momoke-toothbrush/?uat=1`
+
+- 只影響畫冊顯示：每一季的晶片都可以點，每一張卡都看得到圖。收集進度的數字仍是真正已收集的張數。
+- **不會**把未收集的卡寫進收集進度，也不會改 localStorage 的已收集清單。刷牙、贈卡的規則跟平常一樣。
+- 沒有這個參數時（包括加到主畫面後開啟的 App）行為不變，不會誤入預覽。
+- 離開預覽：按畫冊上的「離開預覽」，或自行刪掉網址裡的 `uat`，然後重新整理。
+
 ## 部署（GitHub Pages）
 
 網站：https://jzkitchen.github.io/momoke-toothbrush/ （公開 repo `jzkitchen/momoke-toothbrush`，branch `main`，根目錄）。

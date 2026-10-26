@@ -135,6 +135,44 @@
     return false;
   }
 
+  /**
+   * 家長預覽：網址查詢必須正好是 uat=1（例如 ?uat=1）。
+   * 沒有這個參數時為 false，加到主畫面的 App 不會誤入。
+   * search 可以是 location.search、"?uat=1" 或完整網址。不讀、不寫收集進度。
+   */
+  function isUatMode(search) {
+    var raw = String(search == null ? "" : search);
+    try {
+      var u = /^[a-z][a-z0-9+.-]*:/i.test(raw)
+        ? new URL(raw)
+        : new URL(raw.charAt(0) === "?" ? raw : ("?" + raw), "https://local.invalid/");
+      return u.searchParams.get("uat") === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** 畫冊能否打開這一季。預覽只放寬翻看；抽卡和贈卡仍用 seasonUnlocked，不會因此寫入收集紀錄。 */
+  function albumSeasonOpen(state, sid, uat) {
+    if (uat) return !!(season(sid) && seasonItems(sid).length);
+    return seasonUnlocked(state, sid);
+  }
+
+  /**
+   * 畫冊這一季要畫的卡片。revealed 才顯示圖和名稱。
+   * 預覽模式全部 revealed，collected 仍是真正的收集紀錄。本函式不改 state。
+   */
+  function albumView(state, sid, uat) {
+    var preview = !!uat;
+    var open = albumSeasonOpen(state, sid, preview);
+    var have = collectedSet(state);
+    var items = (open ? seasonItems(sid) : []).map(function (it) {
+      var got = !!have[it.id];
+      return { id: it.id, type: it.type, collected: got, revealed: preview || got };
+    });
+    return { open: open, items: items };
+  }
+
   /** 目前顯示進度的季度：正在收集的季度；全部集齊時為最後一個已開放的季度 */
   function displaySeasonId(state) {
     var sid = currentSeasonId(state);
@@ -579,6 +617,7 @@
     season: season, seasonItems: seasonItems, emptyState: emptyState, normalizeState: normalizeState,
     collectedSet: collectedSet, collectedIn: collectedIn, currentSeasonId: currentSeasonId,
     isSeasonComplete: isSeasonComplete, seasonUnlocked: seasonUnlocked, displaySeasonId: displaySeasonId,
+    isUatMode: isUatMode, albumSeasonOpen: albumSeasonOpen, albumView: albumView,
     applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNextS2: drawNextS2, drawNextS3: drawNextS3, drawNext: drawNext,
     getDay: getDay, validPending: validPending, ensurePending: ensurePending, planBrush: planBrush,
     canEarn: canEarn, brushStartTs: brushStartTs,
