@@ -298,8 +298,9 @@ img { -webkit-user-drag: none; }
 .tab { flex: 1; min-height: 52px; border-radius: 22px; background: transparent; font-size: 21px; font-weight: 800; color: var(--ink-soft); }
 .tab small { font-size: 14px; font-weight: 700; }
 .tab.active { background: linear-gradient(180deg, #b595ff, var(--purple)); color: #fff; }
-.grid { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.cell { background: #fff; border-radius: 18px; padding: 6px 6px 8px; text-align: center; box-shadow: 0 3px 10px rgba(155,107,255,.14); border: 0; display: flex; flex-direction: column; align-items: stretch; }
+/* 1fr 的最小值是內容寬度。不換行的名稱（例如「玩玩萌可／樂樂萌可」）會把那一欄撐闊。minmax(0, 1fr) 加上格子 min-width: 0，三欄才一樣寬；放不下的字用省略號。 */
+.grid { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.cell { min-width: 0; background: #fff; border-radius: 18px; padding: 6px 6px 8px; text-align: center; box-shadow: 0 3px 10px rgba(155,107,255,.14); border: 0; display: flex; flex-direction: column; align-items: stretch; }
 .cell-img { aspect-ratio: 1; border-radius: 13px; overflow: hidden; background: #fff; }
 .cell-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cell-name { font-size: 15px; font-weight: 800; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
