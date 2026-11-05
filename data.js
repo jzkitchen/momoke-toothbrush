@@ -28,13 +28,70 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v19",
+    version: "v20",
 
     // 萬聖節期間覆寫（每年 10 月 28–31 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isHalloween / songFor）：
     // 首頁吉祥物改官方專輯封面；首頁音樂與刷牙音樂都改播萬聖節歌。其他日子不變。
     halloween: {
       music: { src: "audio/halloween.m4a", type: "audio/mp4", title: "萬聖節歌", duration: 88.5 },
       mascot: { src: "img/halloween/album_cover.jpg", alt: "萬聖節愛心萌可" }
+    },
+
+    // 聖誕期間覆寫（每年 12 月 12–27 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isChristmas / christmasFor / songFor）。
+    // 每個香港日分早上（00:00–11:59）與晚上（12:00–23:59）。曲目與封面按預先排好的 32 個時段綁定
+    // （seed 20261212，不是每次開啟隨機重抽）。同一時段內首頁與刷牙播同一首，吉祥物用該首的封面。
+    // 其他日子不變。與萬聖節（10/28–10/31）日期不重疊。
+    christmas: {
+      seed: 20261212,
+      timezone: "Asia/Hong_Kong",
+      tracks: {
+        carol_song: {
+          music: { src: "audio/christmas/carol_song.m4a", type: "audio/mp4", title: "聖誕頌歌", duration: 103.6 },
+          mascot: { src: "img/christmas/carol_song_cover.jpg", alt: "聖誕頌歌封面" }
+        },
+        teeniepingmas: {
+          music: { src: "audio/christmas/teeniepingmas.m4a", type: "audio/mp4", title: "萌可聖誕", duration: 105.4 },
+          mascot: { src: "img/christmas/teeniepingmas_cover.jpg", alt: "萌可聖誕封面" }
+        },
+        secret_christmas: {
+          music: { src: "audio/christmas/secret_christmas.m4a", type: "audio/mp4", title: "秘密聖誕", duration: 106.7 },
+          mascot: { src: "img/christmas/secret_christmas_cover.jpg", alt: "秘密聖誕封面" }
+        }
+      },
+      slots: [
+        { month: 12, day: 12, period: "morning", track_id: "teeniepingmas" },
+        { month: 12, day: 12, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 13, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 13, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 14, period: "morning", track_id: "secret_christmas" },
+        { month: 12, day: 14, period: "evening", track_id: "secret_christmas" },
+        { month: 12, day: 15, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 15, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 16, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 16, period: "evening", track_id: "secret_christmas" },
+        { month: 12, day: 17, period: "morning", track_id: "secret_christmas" },
+        { month: 12, day: 17, period: "evening", track_id: "carol_song" },
+        { month: 12, day: 18, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 18, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 19, period: "morning", track_id: "secret_christmas" },
+        { month: 12, day: 19, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 20, period: "morning", track_id: "teeniepingmas" },
+        { month: 12, day: 20, period: "evening", track_id: "carol_song" },
+        { month: 12, day: 21, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 21, period: "evening", track_id: "carol_song" },
+        { month: 12, day: 22, period: "morning", track_id: "secret_christmas" },
+        { month: 12, day: 22, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 23, period: "morning", track_id: "secret_christmas" },
+        { month: 12, day: 23, period: "evening", track_id: "secret_christmas" },
+        { month: 12, day: 24, period: "morning", track_id: "teeniepingmas" },
+        { month: 12, day: 24, period: "evening", track_id: "teeniepingmas" },
+        { month: 12, day: 25, period: "morning", track_id: "secret_christmas" },
+        { month: 12, day: 25, period: "evening", track_id: "carol_song" },
+        { month: 12, day: 26, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 26, period: "evening", track_id: "secret_christmas" },
+        { month: 12, day: 27, period: "morning", track_id: "carol_song" },
+        { month: 12, day: 27, period: "evening", track_id: "teeniepingmas" }
+      ]
     },
     seasons: [
       {
@@ -89,7 +146,7 @@
         completeTitle: "恭喜集齊閃亮寶石！",
         lockedText: "閃亮寶石 敬請期待",   // 第二季未集齊時，畫冊的第三季分頁顯示這句
         transform: { from: "s2-m-20", to: "s3-m-01" },
-        // 刷牙播片頭曲（有人聲）；首頁播片尾曲純音樂（短循環）。萬聖節期間仍由 logic.js songFor 覆寫。
+        // 刷牙播片頭曲（有人聲）；首頁播片尾曲純音樂（短循環）。萬聖節與聖誕期間仍由 logic.js songFor 覆寫。
         music: {
           op: { src: "audio/s3_gem_op.m4a", type: "audio/mp4", title: "閃亮寶石", duration: 55.8 },
           home: { src: "audio/s3_gem_ed.m4a", type: "audio/mp4", title: "閃亮寶石", instrumental: true, duration: 20.0 }
