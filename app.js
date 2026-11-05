@@ -137,18 +137,23 @@
     $("home-label").textContent = sid === "s1" ? "已收集" : seasonName(sid) + " 已收集";
     $("home-count").textContent = n + " / " + total;
     $("home-bar").style.width = (100 * n / total) + "%";
-    // 萬聖節期間（HK 10/28–10/31）：主頁吉祥物改官方專輯封面（維持既有圓形裁切 CSS）；其他日子還原愛心萌可
+    // 季節覆寫主頁吉祥物（維持既有圓形裁切 CSS）。
+    // 聖誕（HK 12/12–12/27）：該早／晚時段曲目的封面。萬聖節（HK 10/28–10/31）：官方專輯封面。其他日子還原愛心萌可。
     var mascotImg = document.querySelector("#screen-home .mascot img");
     if (mascotImg) {
-      var hw = DATA.halloween, defSrc = "img/s1/01_aixin.jpg", defAlt = "愛心萌可";
-      if (L.isHalloween(ts) && hw && hw.mascot && hw.mascot.src) {
-        if (mascotImg.getAttribute("src") !== hw.mascot.src) {
-          mascotImg.src = hw.mascot.src;
-          mascotImg.alt = hw.mascot.alt || defAlt;
-        }
-      } else if (mascotImg.getAttribute("src") !== defSrc) {
-        mascotImg.src = defSrc;
-        mascotImg.alt = defAlt;
+      var defSrc = "img/s1/01_aixin.jpg", defAlt = "愛心萌可", pick = null;
+      if (L.isChristmas(ts)) {
+        var xmPick = L.christmasFor(ts);
+        if (xmPick && xmPick.mascot && xmPick.mascot.src) pick = xmPick.mascot;
+      } else if (L.isHalloween(ts)) {
+        var hw = DATA.halloween;
+        if (hw && hw.mascot && hw.mascot.src) pick = hw.mascot;
+      }
+      var src = pick ? pick.src : defSrc;
+      var alt = pick ? (pick.alt || defAlt) : defAlt;
+      if (mascotImg.getAttribute("src") !== src) {
+        mascotImg.src = src;
+        mascotImg.alt = alt;
       }
     }
     homeMusic();

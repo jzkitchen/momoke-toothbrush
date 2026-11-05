@@ -1,7 +1,7 @@
 /* 萌可刷牙 — Service Worker（離線快取）
  * 新增/更換任何檔案後，把 VERSION 加一（例如 "v10" → "v11"），並把 data.js 的 version 改成同一個數字，已安裝的 App 會在下次開啟時更新。
  */
-var VERSION = "v19"; // 必須和 data.js 的 version 相同（主頁底部顯示的版本；tests/draw.test.js 會檢查）
+var VERSION = "v20"; // 必須和 data.js 的 version 相同（主頁底部顯示的版本；tests/draw.test.js 會檢查）
 var CACHE = "momoke-brush-" + VERSION;
 importScripts("data.js");
 
@@ -30,6 +30,15 @@ var HW = self.MOMOKE_DATA.halloween;
 if (HW) {
   if (HW.music && HW.music.src) MUSIC.push(HW.music.src);
   if (HW.mascot && HW.mascot.src) IMAGES.push(HW.mascot.src);
+}
+// 聖誕覆寫資源（每年 12/12–12/27 的三首曲目與封面，仍預先快取以便離線）
+var XM = self.MOMOKE_DATA.christmas;
+if (XM && XM.tracks) {
+  Object.keys(XM.tracks).forEach(function (id) {
+    var t = XM.tracks[id];
+    if (t.music && t.music.src) MUSIC.push(t.music.src);
+    if (t.mascot && t.mascot.src) IMAGES.push(t.mascot.src);
+  });
 }
 
 self.addEventListener("install", function (event) {

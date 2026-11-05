@@ -547,31 +547,84 @@
 
 
   /**
+   * Asia/Hong_Kong 的年月日與 24 小時制時刻（與裝置本地時區無關）。
+   * ts 可省略（預設 Date.now()）。hour 為 0–23（午夜若被格式化成 24 會改成 0）。
+   */
+  function hkParts(ts) {
+    var d = new Date(ts == null ? Date.now() : ts);
+    var parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Hong_Kong",
+      year: "numeric", month: "numeric", day: "numeric",
+      hour: "numeric", minute: "numeric", hourCycle: "h23"
+    }).formatToParts(d);
+    var out = { year: 0, month: 0, day: 0, hour: 0, minute: 0 };
+    for (var i = 0; i < parts.length; i++) {
+      var t = parts[i].type;
+      if (t === "year" || t === "month" || t === "day" || t === "hour" || t === "minute") out[t] = +parts[i].value;
+    }
+    if (out.hour === 24) out.hour = 0;
+    return out;
+  }
+
+  /**
    * 是否為萬聖節期間（每年 10 月 28–31 日，含首尾）。
    * 以 Asia/Hong_Kong 日曆判斷（與裝置本地時區無關），year-agnostic。
    * ts 可省略（預設 Date.now()）。
    */
   function isHalloween(ts) {
-    var d = new Date(ts == null ? Date.now() : ts);
-    var parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Hong_Kong", month: "numeric", day: "numeric"
-    }).formatToParts(d);
-    var m = 0, day = 0;
-    for (var i = 0; i < parts.length; i++) {
-      if (parts[i].type === "month") m = +parts[i].value;
-      else if (parts[i].type === "day") day = +parts[i].value;
+    var p = hkParts(ts);
+    return p.month === 10 && p.day >= 28 && p.day <= 31;
+  }
+
+  /**
+   * 是否為聖誕期間（每年 12 月 12–27 日，含首尾）。
+   * 以 Asia/Hong_Kong 日曆判斷（與裝置本地時區無關），year-agnostic。
+   * ts 可省略（預設 Date.now()）。
+   */
+  function isChristmas(ts) {
+    var p = hkParts(ts);
+    return p.month === 12 && p.day >= 12 && p.day <= 27;
+  }
+
+  /**
+   * 聖誕期間目前時段的曲目與封面。不在期間內、或排程找不到時回傳 null。
+   * 早上 = 香港時間 00:00–11:59，晚上 = 12:00–23:59（跟刷牙時段的 04:00／17:00 無關）。
+   * 曲目來自 data.js christmas.slots（預先排好，同一時刻重複呼叫結果不變）。
+   * 回傳 { trackId, period, month, day, music, mascot }。
+   */
+  function christmasFor(ts) {
+    if (!isChristmas(ts)) return null;
+    var xm = DATA.christmas;
+    if (!xm || !xm.tracks || !xm.slots) return null;
+    var p = hkParts(ts);
+    var period = p.hour < 12 ? "morning" : "evening";
+    var trackId = null;
+    for (var i = 0; i < xm.slots.length; i++) {
+      var s = xm.slots[i];
+      if (s.month === 12 && s.day === p.day && s.period === period) { trackId = s.track_id; break; }
     }
-    return m === 10 && day >= 28 && day <= 31;
+    var tr = trackId && xm.tracks[trackId];
+    if (!tr || !tr.music || !tr.music.src) return null;
+    return { trackId: trackId, period: period, month: p.month, day: p.day, music: tr.music, mascot: tr.mascot || null };
   }
 
   /**
    * 音樂：目前收集中的季度的歌；該季未有歌（或已集齊）時，用最近一個已開放而有歌的季度。
    * kind = "op"（預設，刷牙音樂，有人聲）或 "home"（首頁音樂：該季的 music.home 純音樂版；該季沒有 home 時用該季的 op）。
+   * 聖誕期間（isChristmas，HK 12/12–12/27）：首頁與刷牙都改播該早／晚時段排定的同一首（christmasFor）。
    * 萬聖節期間（isHalloween，HK 10/28–10/31）：首頁與刷牙都改播 data.js halloween.music（其他日子不變）。
-   * 第三個參數 ts 可選（傳給 isHalloween；省略則用現在）。
+   * 第三個參數 ts 可選（省略則用現在）。
    * 回傳 { src, type, title, duration, season, kind, instrumental } 或 null（kind 為實際使用的曲目）。
    */
   function songFor(state, kind, ts) {
+    if (isChristmas(ts)) {
+      var xmPick = christmasFor(ts);
+      var cm = xmPick && xmPick.music;
+      if (cm && cm.src) {
+        return { src: cm.src, type: cm.type || "", title: cm.title || "", duration: cm.duration || 0,
+                 season: "christmas", kind: kind === "home" ? "home" : "op", instrumental: !!cm.instrumental };
+      }
+    }
     if (isHalloween(ts)) {
       var hm = DATA.halloween && DATA.halloween.music;
       if (hm && hm.src) {
@@ -622,6 +675,7 @@
     getDay: getDay, validPending: validPending, ensurePending: ensurePending, planBrush: planBrush,
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,
-    isHalloween: isHalloween, songFor: songFor, normalizeSettings: normalizeSettings
+    isHalloween: isHalloween, isChristmas: isChristmas, christmasFor: christmasFor,
+    songFor: songFor, normalizeSettings: normalizeSettings
   };
 });

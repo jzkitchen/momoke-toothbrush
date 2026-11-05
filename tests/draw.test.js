@@ -446,6 +446,115 @@ console.log("✓ 日子與時段");
   }
   console.log("✓ 萬聖節：isHalloween（HK 10/28–10/31）覆寫首頁＋刷牙音樂；其他日子不變");
 }
+
+// ---- 聖誕期間覆寫（Asia/Hong_Kong 12/12–12/27；早上 00:00–11:59、晚上 12:00–23:59）----
+{
+  // 用絕對 UTC 產生明確的 HK 時刻（HKT = UTC+8，無夏令時間；與測試機時區無關）
+  const hk = (y, mo, d, h = 12, min = 0) => Date.UTC(y, mo - 1, d, h - 8, min);
+  // 預先排好的 32 個時段（seed 20261212；不是客戶端隨機）。track 與封面綁定。
+  const EXPECT = {
+    12: { morning: "teeniepingmas", evening: "teeniepingmas" },
+    13: { morning: "carol_song", evening: "teeniepingmas" },
+    14: { morning: "secret_christmas", evening: "secret_christmas" },
+    15: { morning: "carol_song", evening: "teeniepingmas" },
+    16: { morning: "carol_song", evening: "secret_christmas" },
+    17: { morning: "secret_christmas", evening: "carol_song" },
+    18: { morning: "carol_song", evening: "teeniepingmas" },
+    19: { morning: "secret_christmas", evening: "teeniepingmas" },
+    20: { morning: "teeniepingmas", evening: "carol_song" },
+    21: { morning: "carol_song", evening: "carol_song" },
+    22: { morning: "secret_christmas", evening: "teeniepingmas" },
+    23: { morning: "secret_christmas", evening: "secret_christmas" },
+    24: { morning: "teeniepingmas", evening: "teeniepingmas" },
+    25: { morning: "secret_christmas", evening: "carol_song" },
+    26: { morning: "carol_song", evening: "secret_christmas" },
+    27: { morning: "carol_song", evening: "teeniepingmas" }
+  };
+  const TRACKS = {
+    carol_song: { src: "audio/christmas/carol_song.m4a", cover: "img/christmas/carol_song_cover.jpg", title: "聖誕頌歌" },
+    teeniepingmas: { src: "audio/christmas/teeniepingmas.m4a", cover: "img/christmas/teeniepingmas_cover.jpg", title: "萌可聖誕" },
+    secret_christmas: { src: "audio/christmas/secret_christmas.m4a", cover: "img/christmas/secret_christmas_cover.jpg", title: "秘密聖誕" }
+  };
+  for (const day of [12, 13, 20, 25, 27]) {
+    ok(L.isChristmas(hk(2026, 12, day, 0)), `12/${day} 00:00 HKT 是聖誕期間`);
+    ok(L.isChristmas(hk(2026, 12, day, 11, 59)), `12/${day} 11:59 HKT 是聖誕期間`);
+    ok(L.isChristmas(hk(2026, 12, day, 12)), `12/${day} 12:00 HKT 是聖誕期間`);
+    ok(L.isChristmas(hk(2026, 12, day, 23, 59)), `12/${day} 23:59 HKT 是聖誕期間`);
+  }
+  ok(L.isChristmas(hk(2025, 12, 12, 0)), "任何年份 12/12 都是");
+  ok(L.isChristmas(hk(2027, 12, 27, 23, 59)), "任何年份 12/27 都是");
+  ok(!L.isChristmas(hk(2026, 12, 11, 23, 59)), "12/11 23:59 HKT 不是");
+  ok(!L.isChristmas(hk(2026, 12, 28, 0)), "12/28 00:00 HKT 不是");
+  ok(!L.isChristmas(hk(2026, 11, 5, 12)), "11/05 不是");
+  ok(!L.isChristmas(hk(2026, 10, 31, 12)), "10/31 萬聖節不是聖誕");
+  ok(!L.isChristmas(hk(2026, 1, 1, 0)), "1/1 不是");
+  // 剛好跨日：12/11 23:59 → 12/12 00:00；12/27 23:59 → 12/28 00:00
+  ok(!L.isChristmas(Date.UTC(2026, 11, 11, 15, 59)), "12/11 23:59 HKT = UTC 15:59 不是");
+  ok(L.isChristmas(Date.UTC(2026, 11, 11, 16, 0)), "12/12 00:00 HKT = UTC 16:00 是");
+  ok(L.isChristmas(Date.UTC(2026, 11, 27, 15, 59)), "12/27 23:59 HKT = UTC 15:59 是");
+  ok(!L.isChristmas(Date.UTC(2026, 11, 27, 16, 0)), "12/28 00:00 HKT = UTC 16:00 不是");
+
+  const xm = DATA.christmas;
+  ok(xm && xm.tracks && xm.slots, "christmas 資料有 tracks 與 slots");
+  eq(xm.slots.length, 32, "32 個時段（16 日 × 早／晚）");
+  ok(xm.seed === 20261212, "schedule seed 20261212");
+  for (const id of Object.keys(TRACKS)) {
+    const tr = xm.tracks[id];
+    ok(tr && tr.music && tr.music.src === TRACKS[id].src, id + " 音樂路徑");
+    ok(tr.mascot && tr.mascot.src === TRACKS[id].cover, id + " 封面路徑");
+    eq(tr.music.title, TRACKS[id].title, id + " 曲名");
+    ok(fs.existsSync(path.join(__dirname, "..", tr.music.src)), id + " 音樂檔存在");
+    ok(fs.existsSync(path.join(__dirname, "..", tr.mascot.src)), id + " 封面存在");
+  }
+  ok(Math.abs(xm.tracks.secret_christmas.music.duration - 106.7) < 0.05, "secret_christmas 約 106.7 秒");
+
+  const seen = new Set();
+  for (let day = 12; day <= 27; day++) {
+    for (const period of ["morning", "evening"]) {
+      const hour = period === "morning" ? 0 : 12;
+      const ts = hk(2026, 12, day, hour, period === "morning" ? 30 : 0);
+      const edge = period === "morning" ? hk(2026, 12, day, 11, 59) : hk(2026, 12, day, 23, 59);
+      const id = EXPECT[day][period];
+      seen.add(id);
+      const slot = xm.slots.find((s) => s.month === 12 && s.day === day && s.period === period);
+      eq(slot && slot.track_id, id, `data.js 12/${day} ${period} = ${id}`);
+      for (const t of [ts, edge]) {
+        const pick = L.christmasFor(t);
+        eq(pick && pick.trackId, id, `12/${day} ${period} track`);
+        eq(pick.period, period, `12/${day} ${period} 時段`);
+        eq(pick.music.src, TRACKS[id].src, `12/${day} ${period} 音樂`);
+        eq(pick.mascot.src, TRACKS[id].cover, `12/${day} ${period} 封面跟曲目`);
+        eq(L.songFor(L.emptyState(), "home", t).src, TRACKS[id].src, `12/${day} ${period} 首頁歌`);
+        eq(L.songFor(L.emptyState(), "op", t).src, TRACKS[id].src, `12/${day} ${period} 刷牙歌`);
+        eq(L.songFor(L.emptyState(), null, t).src, TRACKS[id].src, `12/${day} ${period} 預設刷牙歌`);
+        eq(L.songFor(L.emptyState(), "home", t).src, L.songFor(L.emptyState(), "op", t).src, "同一時段首頁與刷牙同一首");
+        eq(L.songFor(L.emptyState(), "home", t).season, "christmas");
+        eq(L.songFor(L.emptyState(), "home", t).title, TRACKS[id].title);
+        eq(L.songFor(L.emptyState(), "op", t).title, TRACKS[id].title);
+        const again = L.christmasFor(t);
+        eq(again.trackId, pick.trackId, "同一時刻不重抽");
+        eq(again.music.src, pick.music.src, "同一時刻音樂不變");
+        eq(again.mascot.src, pick.mascot.src, "同一時刻封面不變");
+      }
+    }
+  }
+  eq(seen.size, 3, "三首曲目都有排到");
+  // 12:00 邊界：12/13 11:59 仍是早上 carol_song；12:00 起是晚上 teeniepingmas
+  eq(L.christmasFor(hk(2026, 12, 13, 11, 59)).trackId, "carol_song", "11:59 早上");
+  eq(L.christmasFor(hk(2026, 12, 13, 11, 59)).period, "morning");
+  eq(L.christmasFor(hk(2026, 12, 13, 12, 0)).trackId, "teeniepingmas", "12:00 晚上");
+  eq(L.christmasFor(hk(2026, 12, 13, 12, 0)).period, "evening");
+  eq(L.christmasFor(hk(2025, 12, 25, 8)).trackId, "secret_christmas", "年份不影響排程");
+  eq(L.christmasFor(hk(2027, 12, 25, 18)).trackId, "carol_song", "2027 12/25 晚上仍是 carol_song");
+  // 窗口外維持原曲（含第三季進度）
+  for (const other of [hk(2026, 12, 11, 23, 59), hk(2026, 12, 28, 0), hk(2026, 10, 23, 12)]) {
+    eq(L.christmasFor(other), null, "窗口外沒有聖誕曲目");
+    eq(L.songFor(L.emptyState(), "home", other).src, "audio/s1_home.m4a", "非聖誕首頁仍是純音樂版");
+    eq(L.songFor(L.emptyState(), "op", other).src, "audio/s1_op.m4a", "非聖誕刷牙仍是人聲");
+  }
+  ok(L.isHalloween(hk(2026, 10, 31, 12)) && !L.isChristmas(hk(2026, 10, 31, 12)), "萬聖節窗口仍只算萬聖節");
+  console.log("✓ 聖誕：isChristmas（HK 12/12–12/27）按早／晚時段覆寫首頁＋刷牙音樂與對應封面；其他日子不變");
+}
 // ---- 預備倒數：時段邊緣取對小朋友較有利的時間、家長設定「預備時間」 ----
 {
   const T = (str) => new Date(str).getTime();
