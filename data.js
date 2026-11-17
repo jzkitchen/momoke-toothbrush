@@ -24,7 +24,7 @@
  *   name     顯示名稱
  *   blurb    簡短介紹（可為空字串）
  *   intro    （只限劇照）畫面說明
- *   （劇照的 name / intro 只是資料，App 不會顯示。劇照顯示「第 N 集〈官方集名〉」：集數來自 ep，集名取 blurb「第N集〈標題〉」括號內的原文，見 logic.js 的 stillCaption 與 app.js 的 shown()）
+ *   （劇照的 name / intro 只是資料，App 不會顯示。畫冊格子只顯示「第 N 集」。檢視、獲得卡片和刷牙輪播分兩行：第一行「第 N 集」，第二行「〈官方集名〉」（集名取 blurb「第N集〈標題〉」括號內的原文）。見 logic.js 的 stillGridCaption / stillCaption 與 app.js 的 shown()）
  */
 (function (root) {
   var DATA = {
@@ -303,7 +303,7 @@
     { id: "s2-p-01", season: "s2", type: "princess", name: "陽光公主", royal: "s2-m-01", img: "img/s2_princess/01_yangguang.jpg", blurb: "樂美和幸福萌可一起變身成陽光公主！" },
     { id: "s2-p-02", season: "s2", type: "princess", name: "神聖公主", img: "img/s2_princess/02_shensheng.jpg", blurb: "樂美和六隻皇室萌可一起變身成神聖公主！" },
 
-    // ---- 第二季：52 張劇照（每集 a、b 兩張）：name / blurb / intro 取自 s2_stills/blurbs.json。畫面顯示「第 N 集〈官方集名〉」（集名來自 blurb），不顯示 name / intro ----
+    // ---- 第二季：52 張劇照（每集 a、b 兩張）：name / blurb / intro 取自 s2_stills/blurbs.json。畫冊格子只顯示「第 N 集」；檢視／獲得／輪播分兩行顯示集數與 blurb 裡的官方集名，不顯示 name / intro ----
     { id: "s2-still-ep01a", season: "s2", type: "still", ep: 1, name: "粉紅髮女孩與萌可", img: "img/s2_stills/ep01_a.jpg", blurb: "第1集〈最喜歡搗亂了〉", intro: "粉紅髮的女孩肩上站著一隻粉紅色的小萌可，身處柔和的粉紅色房間裡。" },
     { id: "s2-still-ep01b", season: "s2", type: "still", ep: 1, name: "手持玩具錘的萌可", img: "img/s2_stills/ep01_b.jpg", blurb: "第1集〈最喜歡搗亂了〉", intro: "一隻戴黃色尖角帽的小萌可，手裡拿著一把淺藍色的玩具錘。" },
     { id: "s2-still-ep02a", season: "s2", type: "still", ep: 2, name: "神情嚴肅的女孩", img: "img/s2_stills/ep02_a.jpg", blurb: "第2集〈好冷好冷 冷冷萌可〉", intro: "粉紅髮的女孩神情嚴肅，肩上和頭上各有一隻小萌可，旁邊的白色檯面上還有幾隻萌可。" },
@@ -385,7 +385,7 @@
     { id: "s3-p-03", season: "s3", type: "princess", name: "翡翠公主", royal: "s3-m-04", img: "img/s3_gem_princess/03_feicui.jpg", blurb: "樂美和贊贊萌可一起變身成翡翠公主！" },
     { id: "s3-p-04", season: "s3", type: "princess", name: "藍寶石公主", royal: "s3-m-03", img: "img/s3_gem_princess/04_lanshiba.jpg", blurb: "樂美和信信萌可一起變身成藍寶石公主！" },
 
-    // ---- 第三季：52 張劇照（每集 a、b 兩張）。畫面顯示「第 N 集〈官方集名〉」（集名來自 blurb，不用 name）；name / blurb 保留集數標題 ----
+    // ---- 第三季：52 張劇照（每集 a、b 兩張）。畫冊格子只顯示「第 N 集」；檢視／獲得／輪播的集名來自 blurb，不用 name。name / blurb 保留集數標題 ----
     { id: "s3-still-ep01a", season: "s3", type: "still", ep: 1, name: "閃閃亮亮，寶石萌可", img: "img/s3_gem_stills/ep01_a.jpg", blurb: "第1集〈閃閃亮亮，寶石萌可〉", intro: "" },
     { id: "s3-still-ep01b", season: "s3", type: "still", ep: 1, name: "閃閃亮亮，寶石萌可", img: "img/s3_gem_stills/ep01_b.jpg", blurb: "第1集〈閃閃亮亮，寶石萌可〉", intro: "" },
     { id: "s3-still-ep02a", season: "s3", type: "still", ep: 2, name: "萌可學校開學！", img: "img/s3_gem_stills/ep02_a.jpg", blurb: "第2集〈萌可學校開學！〉", intro: "" },
@@ -470,7 +470,7 @@
     { id: "s4-p-05", season: "s4", type: "princess", name: "暮光公主", royal: "s4-m-04", img: "img/s4_princess/05_muguang.jpg", blurb: "樂美和幸運萌可一起變身成暮光公主！" },
     { id: "s4-p-06", season: "s4", type: "princess", name: "迷宮公主", royal: "s4-m-20", img: "img/s4_princess/06_migong.jpg", blurb: "珍珠和奉獻萌可一起變身成迷宮公主！" },
 
-    // ---- 第四季：52 張劇照（每集 a、b 兩張）。畫面顯示「第 N 集〈官方集名〉」（集名來自 blurb，不用 name）；name / blurb 保留集數標題 ----
+    // ---- 第四季：52 張劇照（每集 a、b 兩張）。畫冊格子只顯示「第 N 集」；檢視／獲得／輪播的集名來自 blurb，不用 name。name / blurb 保留集數標題 ----
     { id: "s4-still-ep01a", season: "s4", type: "still", ep: 1, name: "迷迷糊糊，鑰匙萌可", img: "img/s4_stills/ep01_a.jpg", blurb: "第1集〈迷迷糊糊，鑰匙萌可〉", intro: "" },
     { id: "s4-still-ep01b", season: "s4", type: "still", ep: 1, name: "迷迷糊糊，鑰匙萌可", img: "img/s4_stills/ep01_b.jpg", blurb: "第1集〈迷迷糊糊，鑰匙萌可〉", intro: "" },
     { id: "s4-still-ep02a", season: "s4", type: "still", ep: 2, name: "變身！花神公主", img: "img/s4_stills/ep02_a.jpg", blurb: "第2集〈變身！花神公主〉", intro: "" },

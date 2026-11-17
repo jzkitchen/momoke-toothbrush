@@ -97,15 +97,15 @@
     p.appendChild(el("span", "", "圖片準備中"));
     return p;
   }
-  // 劇照顯示「第 N 集〈官方集名〉」（集數來自 ep，集名來自 blurb 的〈〉，logic.js 的 stillCaption）。
-  // 不顯示 name（第一、二季是畫面名稱）或 intro。blurb / intro 只留在資料裡，不會畫出來。
+  // 劇照：畫冊格子（mode "grid"）只顯示「第 N 集」。檢視、獲得卡片、刷牙輪播用 stillCaption，
+  // 固定兩行（「第 N 集」換行後是「〈官方集名〉」）。不顯示 name（第一、二季是畫面名稱）或 intro。
   // 萌可和公主維持原本的名稱和簡介。畫面、alt 文字都經過這裡。
-  function shown(item) {
-    if (item.type === "still") return { name: L.stillCaption(item), blurb: "", intro: "" };
+  function shown(item, mode) {
+    if (item.type === "still") return { name: mode === "grid" ? L.stillGridCaption(item) : L.stillCaption(item), blurb: "", intro: "" };
     return { name: item.name, blurb: item.blurb || "", intro: item.intro || "" };
   }
-  function cardVisual(item) {
-    var label = shown(item).name;
+  function cardVisual(item, mode) {
+    var label = shown(item, mode).name;
     if (!item.img) return placeholder(label);
     var img = el("img");
     img.alt = label;
@@ -1020,9 +1020,9 @@
       var c = el("button", "cell" + (show ? "" : " locked"));
       c.type = "button";
       var box = el("div", "cell-img");
-      if (show) box.appendChild(cardVisual(it)); else box.textContent = "？";
+      if (show) box.appendChild(cardVisual(it, albumTab === "still" ? "grid" : "")); else box.textContent = "？";
       c.appendChild(box);
-      c.appendChild(el("div", "cell-name", show ? shown(it).name : "？？？"));
+      c.appendChild(el("div", "cell-name", show ? shown(it, albumTab === "still" ? "grid" : "").name : "？？？"));
       if (show) {
         c.setAttribute("data-id", it.id);
         c.addEventListener("click", function () { openViewer(albumTab, it.id); });

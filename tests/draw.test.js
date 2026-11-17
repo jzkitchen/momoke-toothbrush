@@ -74,7 +74,7 @@ if (fs.existsSync(V2)) {
 }
 console.log("✓ 資料檢查（81 張 = 24 萌可 + 5 公主 + 52 劇照）");
 
-// ---- 劇照顯示：第 N 集〈官方集名〉，集名只取 blurb 的〈〉，不用 name / intro ----
+// ---- 劇照顯示：格子只「第 N 集」；檢視／獲得／輪播是兩行「第 N 集」＋「〈官方集名〉」----
 {
   const STILL_BLURB = /^第(\d+)集〈([^〉]+)〉$/;
   const allStills = DATA.items.filter((i) => i.type === "still");
@@ -87,20 +87,33 @@ console.log("✓ 資料檢查（81 張 = 24 萌可 + 5 公主 + 52 劇照）");
     const m = STILL_BLURB.exec(s.blurb || "");
     if (!m) { unparsed.push(s.id); return; }
     eq(Number(m[1]), s.ep, s.id + " blurb 集數等於 ep");
-    eq(L.stillCaption(s), "第 " + s.ep + " 集〈" + m[2] + "〉", s.id + " stillCaption");
+    const grid = "第 " + s.ep + " 集";
+    const lines = L.stillCaption(s).split("\n");
+    eq(L.stillGridCaption(s), grid, s.id + " 格子只顯示集數");
+    eq(lines.length, 2, s.id + " 詳情固定兩行");
+    eq(lines[0], grid, s.id + " 第一行是集數");
+    eq(lines[1], "〈" + m[2] + "〉", s.id + " 第二行是官方集名");
+    eq(L.stillCaption(s), grid + "\n〈" + m[2] + "〉", s.id + " stillCaption");
+    ok(!L.stillGridCaption(s).includes(m[2]), s.id + " 格子不含集名");
     if (s.intro) ok(!L.stillCaption(s).includes(s.intro), s.id + " 標題不含 intro");
+    if (s.name !== m[2]) ok(!L.stillGridCaption(s).includes(s.name), s.id + " 格子不含場景名稱");
   });
   eq(unparsed.length, 0, "每張劇照的 blurb 都能解析出官方集名" + (unparsed.length ? "：" + unparsed.join(",") : ""));
-  eq(L.stillCaption(L.byId["s4-still-ep25a"]), "第 25 集〈危機一觸即發，秘鑰之境〉", "S4 第 25 集 a");
-  eq(L.stillCaption(L.byId["s4-still-ep25b"]), "第 25 集〈危機一觸即發，秘鑰之境〉", "S4 第 25 集 b");
+  eq(L.stillCaption(L.byId["s4-still-ep25a"]), "第 25 集\n〈危機一觸即發，秘鑰之境〉", "S4 第 25 集 a");
+  eq(L.stillCaption(L.byId["s4-still-ep25b"]), "第 25 集\n〈危機一觸即發，秘鑰之境〉", "S4 第 25 集 b");
+  eq(L.stillGridCaption(L.byId["s4-still-ep25a"]), "第 25 集", "S4 第 25 集格子");
   const s1a = L.byId["s1-still-ep01a"];
-  eq(L.stillCaption(s1a), "第 1 集〈亂七八糟的烘焙直播〉", "S1 第 1 集用 blurb 集名");
+  eq(L.stillCaption(s1a), "第 1 集\n〈亂七八糟的烘焙直播〉", "S1 第 1 集用 blurb 集名");
+  eq(L.stillGridCaption(s1a), "第 1 集", "S1 第 1 集格子");
   ok(!L.stillCaption(s1a).includes("樂美與愛心萌可"), "S1 第 1 集不顯示場景名稱");
+  ok(!L.stillGridCaption(s1a).includes("樂美與愛心萌可"), "S1 第 1 集格子不顯示場景名稱");
   ok(!L.stillCaption(s1a).includes(s1a.intro), "S1 第 1 集不顯示 intro");
   eq(L.stillCaption(L.byId["s1-m-01"]), "", "萌可不套用劇照標題");
+  eq(L.stillGridCaption(L.byId["s1-m-01"]), "", "萌可沒有格子集數");
   eq(L.stillCaption(L.byId["s1-p-01"]), "", "公主不套用劇照標題");
   eq(L.stillCaption({ type: "still", ep: 3, blurb: "沒有集名", name: "樂美與愛心萌可", intro: "畫面說明" }), "", "解析不到集名時不發明標題");
-  console.log("✓ 劇照標題：208 張都是「第 N 集〈官方集名〉」");
+  eq(L.stillGridCaption({ type: "still", ep: 3, blurb: "沒有集名", name: "樂美與愛心萌可", intro: "畫面說明" }), "第 3 集", "解析不到集名時格子仍顯示集數");
+  console.log("✓ 劇照標題：格子是「第 N 集」，詳情是兩行集數與官方集名");
 }
 
 // ---- 抽卡順序檢查（共用） ----
