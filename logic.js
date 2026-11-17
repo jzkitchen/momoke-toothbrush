@@ -735,6 +735,16 @@
     return out;
   }
 
+  // 劇照顯示文字。集數用 ep（「第 N 集」兩側留空），集名只取 blurb「第N集〈標題〉」括號內的原文。
+  // 解析不到就不猜標題。name（第一、二季是畫面名稱）和 intro 都不放進這句。
+  var STILL_BLURB_RE = /^第(\d+)集〈([^〉]+)〉$/;
+  function stillCaption(item) {
+    if (!item || item.type !== "still") return "";
+    var m = STILL_BLURB_RE.exec(item.blurb || "");
+    if (!m) return "";
+    return "第 " + item.ep + " 集〈" + m[2] + "〉";
+  }
+
   return {
     SCHEMA: SCHEMA, BRUSH_MS: BRUSH_MS, ZONE_MS: ZONE_MS, DAY_START_HOUR: DAY_START_HOUR,
     byId: byId, dayKey: dayKey, slotOf: slotOf, ymd: ymd, SLOT_KEYS: SLOT_KEYS,
@@ -747,6 +757,6 @@
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,
     isHalloween: isHalloween, isChristmas: isChristmas, christmasFor: christmasFor,
-    songFor: songFor, normalizeSettings: normalizeSettings
+    songFor: songFor, normalizeSettings: normalizeSettings, stillCaption: stillCaption
   };
 });

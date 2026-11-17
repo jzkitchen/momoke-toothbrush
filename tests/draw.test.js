@@ -74,6 +74,35 @@ if (fs.existsSync(V2)) {
 }
 console.log("✓ 資料檢查（81 張 = 24 萌可 + 5 公主 + 52 劇照）");
 
+// ---- 劇照顯示：第 N 集〈官方集名〉，集名只取 blurb 的〈〉，不用 name / intro ----
+{
+  const STILL_BLURB = /^第(\d+)集〈([^〉]+)〉$/;
+  const allStills = DATA.items.filter((i) => i.type === "still");
+  eq(allStills.length, 208, "四季風照共 208 張");
+  ["s1", "s2", "s3", "s4"].forEach((sid) => {
+    eq(allStills.filter((s) => s.season === sid).length, 52, sid + " 劇照 52 張");
+  });
+  const unparsed = [];
+  allStills.forEach((s) => {
+    const m = STILL_BLURB.exec(s.blurb || "");
+    if (!m) { unparsed.push(s.id); return; }
+    eq(Number(m[1]), s.ep, s.id + " blurb 集數等於 ep");
+    eq(L.stillCaption(s), "第 " + s.ep + " 集〈" + m[2] + "〉", s.id + " stillCaption");
+    if (s.intro) ok(!L.stillCaption(s).includes(s.intro), s.id + " 標題不含 intro");
+  });
+  eq(unparsed.length, 0, "每張劇照的 blurb 都能解析出官方集名" + (unparsed.length ? "：" + unparsed.join(",") : ""));
+  eq(L.stillCaption(L.byId["s4-still-ep25a"]), "第 25 集〈危機一觸即發，秘鑰之境〉", "S4 第 25 集 a");
+  eq(L.stillCaption(L.byId["s4-still-ep25b"]), "第 25 集〈危機一觸即發，秘鑰之境〉", "S4 第 25 集 b");
+  const s1a = L.byId["s1-still-ep01a"];
+  eq(L.stillCaption(s1a), "第 1 集〈亂七八糟的烘焙直播〉", "S1 第 1 集用 blurb 集名");
+  ok(!L.stillCaption(s1a).includes("樂美與愛心萌可"), "S1 第 1 集不顯示場景名稱");
+  ok(!L.stillCaption(s1a).includes(s1a.intro), "S1 第 1 集不顯示 intro");
+  eq(L.stillCaption(L.byId["s1-m-01"]), "", "萌可不套用劇照標題");
+  eq(L.stillCaption(L.byId["s1-p-01"]), "", "公主不套用劇照標題");
+  eq(L.stillCaption({ type: "still", ep: 3, blurb: "沒有集名", name: "樂美與愛心萌可", intro: "畫面說明" }), "", "解析不到集名時不發明標題");
+  console.log("✓ 劇照標題：208 張都是「第 N 集〈官方集名〉」");
+}
+
 // ---- 抽卡順序檢查（共用） ----
 function checkSequence(seq, label) {
   eq(seq.length, TOTAL, label + "：共 81 張");
@@ -1180,7 +1209,7 @@ console.log("✓ 日子與時段");
   "img/s4/12_shishang.jpg": "e146313630bcefe11fc470f1f80f0d838af7bae370d44fb671bee6c2ceb95b50"
 };
 
-  eq(DATA.version, "v23", "data.js 版本 v23");
+  eq(DATA.version, "v24", "data.js 版本 v24");
   eq(S4.id, "s4");
   eq(S4.name, "魔法鑰匙");
   ok(S4.open === true, "第四季 open");
@@ -1287,7 +1316,7 @@ console.log("✓ 日子與時段");
   const sw = fs.readFileSync(path.join(__dirname, "..", "sw.js"), "utf8");
   ok(/\(self\.MOMOKE_DATA\.items \|\| \[\]\)/.test(sw), "卡片圖由 sw.js 跟 data.js 快取");
   ok(/s\.music\[k\]\.src/.test(sw), "季節音樂由 sw.js 快取");
-  eq((/var VERSION = "(v\d+)"/.exec(sw) || [])[1], "v23", "sw.js VERSION v23");
+  eq((/var VERSION = "(v\d+)"/.exec(sw) || [])[1], "v24", "sw.js VERSION v24");
 
   const priorSeasons = () => DATA.items.filter((it) => it.season === "s1" || it.season === "s2" || it.season === "s3");
   const baseS3 = () => {

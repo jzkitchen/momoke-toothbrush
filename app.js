@@ -97,10 +97,11 @@
     p.appendChild(el("span", "", "圖片準備中"));
     return p;
   }
-  // 劇照只顯示集數（「第 3 集」），不顯示 data.js 裡的名稱 / 簡介（blurb / intro 只留在資料裡，不會畫出來）。
-  // 萌可和公主維持原本的名稱和簡介。畫面、alt 文字都經過這裡，所以不會露出劇照的舊說明文字。
+  // 劇照顯示「第 N 集〈官方集名〉」（集數來自 ep，集名來自 blurb 的〈〉，logic.js 的 stillCaption）。
+  // 不顯示 name（第一、二季是畫面名稱）或 intro。blurb / intro 只留在資料裡，不會畫出來。
+  // 萌可和公主維持原本的名稱和簡介。畫面、alt 文字都經過這裡。
   function shown(item) {
-    if (item.type === "still") return { name: "第 " + item.ep + " 集", blurb: "", intro: "" };
+    if (item.type === "still") return { name: L.stillCaption(item), blurb: "", intro: "" };
     return { name: item.name, blurb: item.blurb || "", intro: item.intro || "" };
   }
   function cardVisual(item) {
@@ -863,7 +864,8 @@
     $("capture-number").textContent = "第 " + res.number + " 張 / " + total + " 張";
     var sh = shown(item);
     $("capture-name").textContent = sh.name;
-    $("capture-name").classList.toggle("long", sh.name.length > 6);
+    $("capture-name").classList.toggle("long", item.type !== "still" && sh.name.length > 6);
+    $("capture-name").classList.toggle("still-caption", item.type === "still");
     $("capture-blurb").textContent = sh.blurb;
     $("capture-blurb").hidden = !sh.blurb;
     $("capture-intro").textContent = sh.intro;
@@ -1074,7 +1076,8 @@
     $("viewer-type").textContent = TYPE_LABEL[it.category || it.type] || "";
     var sh = shown(it);
     $("viewer-name").textContent = sh.name;
-    $("viewer-name").classList.toggle("long", sh.name.length > 6);
+    $("viewer-name").classList.toggle("long", it.type !== "still" && sh.name.length > 6);
+    $("viewer-name").classList.toggle("still-caption", it.type === "still");
     $("viewer-blurb").textContent = sh.blurb;
     $("viewer-blurb").hidden = !sh.blurb;
     $("viewer-intro").textContent = sh.intro;
