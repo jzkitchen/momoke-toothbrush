@@ -29,7 +29,7 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v22",
+    version: "v23",
 
     // 萬聖節期間覆寫（每年 10 月 28–31 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isHalloween / songFor）：
     // 首頁吉祥物改官方專輯封面；首頁音樂與刷牙音樂都改播萬聖節歌。其他日子不變。
@@ -468,7 +468,7 @@
     { id: "s4-p-03", season: "s4", type: "princess", name: "彩雲公主", royal: "s4-m-03", img: "img/s4_princess/03_caiyun.jpg", blurb: "樂美和誠實萌可一起變身成彩雲公主！" },
     { id: "s4-p-04", season: "s4", type: "princess", name: "雪花公主", royal: "s4-m-01", img: "img/s4_princess/04_xuehua.jpg", blurb: "樂美和好好萌可一起變身成雪花公主！" },
     { id: "s4-p-05", season: "s4", type: "princess", name: "暮光公主", royal: "s4-m-04", img: "img/s4_princess/05_muguang.jpg", blurb: "樂美和幸運萌可一起變身成暮光公主！" },
-    { id: "s4-p-06", season: "s4", type: "princess", name: "迷宮公主", royal: "s4-m-20", img: "img/s4_princess/06_migong.jpg", blurb: "樂美和奉獻萌可一起變身成迷宮公主！" },
+    { id: "s4-p-06", season: "s4", type: "princess", name: "迷宮公主", royal: "s4-m-20", img: "img/s4_princess/06_migong.jpg", blurb: "珍珠和奉獻萌可一起變身成迷宮公主！" },
 
     // ---- 第四季：52 張劇照（每集 a、b 兩張）。畫面上只顯示「第 N 集」；name / blurb 保留集數標題 ----
     { id: "s4-still-ep01a", season: "s4", type: "still", ep: 1, name: "迷迷糊糊，鑰匙萌可", img: "img/s4_stills/ep01_a.jpg", blurb: "第1集〈迷迷糊糊，鑰匙萌可〉", intro: "" },

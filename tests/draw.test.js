@@ -1043,7 +1043,7 @@ console.log("✓ 日子與時段");
   "s4-p-03": "樂美和誠實萌可一起變身成彩雲公主！",
   "s4-p-04": "樂美和好好萌可一起變身成雪花公主！",
   "s4-p-05": "樂美和幸運萌可一起變身成暮光公主！",
-  "s4-p-06": "樂美和奉獻萌可一起變身成迷宮公主！"
+  "s4-p-06": "珍珠和奉獻萌可一起變身成迷宮公主！"
 };
   const TITLES = [
   "迷迷糊糊，鑰匙萌可",
@@ -1180,7 +1180,7 @@ console.log("✓ 日子與時段");
   "img/s4/12_shishang.jpg": "e146313630bcefe11fc470f1f80f0d838af7bae370d44fb671bee6c2ceb95b50"
 };
 
-  eq(DATA.version, "v22", "data.js 版本 v22");
+  eq(DATA.version, "v23", "data.js 版本 v23");
   eq(S4.id, "s4");
   eq(S4.name, "魔法鑰匙");
   ok(S4.open === true, "第四季 open");
@@ -1287,7 +1287,7 @@ console.log("✓ 日子與時段");
   const sw = fs.readFileSync(path.join(__dirname, "..", "sw.js"), "utf8");
   ok(/\(self\.MOMOKE_DATA\.items \|\| \[\]\)/.test(sw), "卡片圖由 sw.js 跟 data.js 快取");
   ok(/s\.music\[k\]\.src/.test(sw), "季節音樂由 sw.js 快取");
-  eq((/var VERSION = "(v\d+)"/.exec(sw) || [])[1], "v22", "sw.js VERSION v22");
+  eq((/var VERSION = "(v\d+)"/.exec(sw) || [])[1], "v23", "sw.js VERSION v23");
 
   const priorSeasons = () => DATA.items.filter((it) => it.season === "s1" || it.season === "s2" || it.season === "s3");
   const baseS3 = () => {
