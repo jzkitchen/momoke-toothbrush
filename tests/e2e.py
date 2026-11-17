@@ -67,18 +67,40 @@ FOAM_JS = """(region) => { const c = document.getElementById('foam'); if (!c || 
     for (let i = 3; i < d.length; i += 4 * 5) { n++; if (d[i] > 24) on++; } return on / n; }"""
 def foam(page, region=None):
     return page.evaluate(FOAM_JS, region)
-def episode_of(b):
-    return "第 %d 集" % int(re.match(r"ep(\d+)_", b["file"]).group(1))
+def _still_title(b):
+    m = re.match(r"^第(\d+)集〈([^〉]+)〉$", b["blurb"])
+    if not m:
+        raise AssertionError("still blurb has no official title: %s %r" % (b.get("file"), b.get("blurb")))
+    return int(m.group(1)), m.group(2)
 
-def caption_leaks(page, b):
-    """劇照的舊說明文字（名稱 / 簡介 / 說明 / 標題）有沒有出現在目前看得到的文字、alt、aria-label、title 裡"""
-    return page.evaluate("""(b) => {
+def episode_num(b):
+    """畫冊格子：「第 N 集」。"""
+    ep, _title = _still_title(b)
+    return "第 %d 集" % ep
+
+def episode_of(b):
+    """檢視／獲得／輪播：第一行「第 N 集」，第二行「〈官方集名〉」。集名只取 blurb 括號內原文。"""
+    ep, title = _still_title(b)
+    return "第 %d 集\n〈%s〉" % (ep, title)
+
+def caption_leaks(page, b, allow_title=False):
+    """intro、有別於官方集名的場景名稱、未加空格的原始 blurb 算洩漏。
+    allow_title 為假（畫冊格子）時，官方集名也算洩漏。為真（檢視／獲得／輪播）時，兩行標題裡的集名允許出現。
+    第三、四季 name 與官方集名相同，不另算場景名稱洩漏。"""
+    return page.evaluate("""([b, allowTitle]) => {
         const texts = [document.body.innerText];
         document.querySelectorAll('[alt],[aria-label],[title]').forEach(e => { if (e.getClientRects().length > 0) texts.push(e.getAttribute('alt') || '', e.getAttribute('aria-label') || '', e.getAttribute('title') || ''); });
-        const all = texts.join('\\n');
-        const title = (b.blurb.match(/〈(.+)〉/) || [])[1];
-        return [b.title, b.blurb, b.intro, title].filter(x => x && all.includes(x));
-    }""", b)
+        let all = texts.join('\\n');
+        const m = /^第(\\d+)集〈([^〉]+)〉$/.exec(b.blurb || '');
+        const official = m ? m[2] : '';
+        if (allowTitle && official) all = all.split(official).join('');
+        const leaks = [];
+        if (b.intro && all.includes(b.intro)) leaks.push(b.intro);
+        if (b.title && b.title !== official && all.includes(b.title)) leaks.push(b.title);
+        if (b.blurb && all.includes(b.blurb)) leaks.push(b.blurb);
+        if (!allowTitle && official && all.includes(official)) leaks.push(official);
+        return leaks;
+    }""", [b, allow_title])
 
 def music(page):
     return page.evaluate("window.__momoke.music()")
@@ -587,8 +609,9 @@ with sync_playwright() as p:
     ok(r == "capture" and len(state(page)["collected"]) == 5, "after migration evening brushing earns a card")
     page.click("#btn-capture-done")
     page.click("#btn-album"); page.click(".tab[data-tab=still]")
-    ok("第 7 集" in page.locator("#album-grid .cell:not(.locked) .cell-name").all_inner_texts()
-       and page.locator('#album-grid img[src="img/stills/ep07_a.jpg"]').count() == 1, "migrated still appears in 劇照 tab as ep07_a (shown as 第 7 集)")
+    ep07 = episode_num([b for b in blurbs if b["file"] == "ep07_a.jpg"][0])
+    ok(ep07 in page.locator("#album-grid .cell:not(.locked) .cell-name").all_inner_texts()
+       and page.locator('#album-grid img[src="img/stills/ep07_a.jpg"]').count() == 1, f"migrated still appears in 劇照 tab as ep07_a (shown as {ep07})")
 
     # ---- 17. slideshow placeholder when nothing collected ----
     page.evaluate("localStorage.clear()")
@@ -745,9 +768,10 @@ with sync_playwright() as p:
         ok(page.get_attribute("#reveal", "data-id") == "s2-still-ep05b" and page.locator("#reveal.wide").is_visible(), "pending Season 2 still shown in the wide reveal frame while brushing")
     r = brush(page, "2026-11-05T08:00", speed=10, on_brush=s2_still_reveal)
     b5s2 = [b for b in s2_blurbs if b["file"] == "ep05_b.jpg"][0]
-    ok(r == "capture" and text(page, "#capture-name") == "第 5 集" and page.locator("#capture-blurb").is_hidden() and page.locator("#capture-intro").is_hidden()
-       and "第 2 張 / 72 張" in text(page, "#capture-number"), "earned Season 2 still: only 「第 5 集」, no caption, 第 2 張 / 72 張")
-    ok(not caption_leaks(page, b5s2), f"Season 2 still: old caption text not visible anywhere ({caption_leaks(page, b5s2)})")
+    s2_ep05 = episode_of(b5s2)
+    ok(r == "capture" and text(page, "#capture-name") == s2_ep05 and page.locator("#capture-blurb").is_hidden() and page.locator("#capture-intro").is_hidden()
+       and "第 2 張 / 72 張" in text(page, "#capture-number"), f"earned Season 2 still: {s2_ep05}, blurb / intro hidden, 第 2 張 / 72 張")
+    ok(not caption_leaks(page, b5s2, True), f"Season 2 still: scene name / intro not visible ({caption_leaks(page, b5s2, True)})")
     page.screenshot(path=os.path.join(SHOTS, "27_s2_still_card.png"))
     page.click("#btn-capture-done"); page.wait_for_selector("#screen-home.active")
 
@@ -773,15 +797,18 @@ with sync_playwright() as p:
     page.click("#viewer-close")
     page.click(".tab[data-tab=still]")
     imgs_loaded(page, "#album-grid img", 6)
+    s2_by = {b["file"]: b for b in s2_blurbs}
+    s2_expect = [episode_num(s2_by[f]) for f in ("ep02_a.jpg", "ep05_b.jpg", "ep09_a.jpg", "ep13_b.jpg", "ep20_a.jpg", "ep26_b.jpg")]
     nm = page.locator("#album-grid .cell:not(.locked) .cell-name").all_inner_texts()
-    ok(page.locator("#album-grid .cell").count() == 52 and nm == ["第 2 集", "第 5 集", "第 9 集", "第 13 集", "第 20 集", "第 26 集"],
+    ok(page.locator("#album-grid .cell").count() == 52 and nm == s2_expect,
        f"Season 2 劇照 tab: 52 slots, 6 collected, each labelled only 第 N 集 ({nm})")
     ok(page.evaluate("[...document.querySelectorAll('#album-grid img')].every(i => /^第 \\d+ 集$/.test(i.alt))") and page.locator("#album-grid .placeholder").count() == 0, "Season 2 stills: alt text only 第 N 集, images load")
     page.locator("#album-grid .cell:not(.locked)").first.click()
     page.wait_for_selector("#viewer:not([hidden])")
     page.wait_for_function("document.querySelector('#viewer-card img') && document.querySelector('#viewer-card img').naturalWidth > 0")
-    ok(text(page, "#viewer-name") == "第 2 集" and page.locator("#viewer-blurb").is_hidden() and page.locator("#viewer-intro").is_hidden() and "劇照" in text(page, "#viewer-type")
-       and not caption_leaks(page, [b for b in s2_blurbs if b["file"] == "ep02_a.jpg"][0]), "Season 2 still viewer: only 第 2 集, no caption")
+    s2_ep02 = episode_of(s2_by["ep02_a.jpg"])
+    ok(text(page, "#viewer-name") == s2_ep02 and page.locator("#viewer-blurb").is_hidden() and page.locator("#viewer-intro").is_hidden() and "劇照" in text(page, "#viewer-type")
+       and not caption_leaks(page, s2_by["ep02_a.jpg"], True), f"Season 2 still viewer: two lines {s2_ep02!r}, no scene caption")
     page.click("#viewer-close")
     page.click("#album-season"); page.wait_for_timeout(200)
     ok(text(page, "#album-season") == "第一季 81 / 81" and page.locator(".tab[data-tab=princess]").is_visible() and page.locator(".tab[data-tab=momoke] small").inner_text() == "24/24", "switch back to Season 1: 81 / 81, 公主 tab visible, 萌可 24/24")
@@ -872,7 +899,7 @@ with sync_playwright() as p:
     page.click(".tab[data-tab=still]")
     imgs_loaded(page, "#album-grid img", 52)
     names = page.locator("#album-grid .cell-name").all_inner_texts()
-    ok(names == [episode_of(b) for b in blurbs], "劇照 tab: 52 stills ordered by episode then a/b, each labelled only 第 N 集")
+    ok(names == [episode_num(b) for b in blurbs], "劇照 tab: 52 stills ordered by episode then a/b, each labelled only 第 N 集")
     ok(page.evaluate("[...document.querySelectorAll('#album-grid img')].every(i => /^第 \\d+ 集$/.test(i.alt))"), "劇照 tab: image alt text is only 第 N 集")
     leaks = [caption_leaks(page, b) for b in blurbs]
     ok(not any(leaks), f"劇照 tab: none of the old captions appear in the visible album text / alt ({[l for l in leaks if l][:2]})")
@@ -893,17 +920,21 @@ with sync_playwright() as p:
         page.locator("#album-grid .cell").nth(idx).click()
         page.wait_for_function("document.querySelector('#viewer-card img') && document.querySelector('#viewer-card img').naturalWidth > 0")
         b = blurbs[idx]
-        good = (text(page, "#viewer-name") == episode_of(b) and page.locator("#viewer-blurb").is_hidden() and page.locator("#viewer-intro").is_hidden()
-                and text(page, "#viewer-blurb") == "" and text(page, "#viewer-intro") == "" and not caption_leaks(page, b)
-                and page.evaluate("document.querySelector('#viewer-card img').alt") == episode_of(b))
-        all_ok = all_ok and good
+        cap = episode_of(b)
+        good = (text(page, "#viewer-name") == cap and "\n〈" in cap and page.locator("#viewer-blurb").is_hidden() and page.locator("#viewer-intro").is_hidden()
+                and text(page, "#viewer-blurb") == "" and text(page, "#viewer-intro") == "" and not caption_leaks(page, b, True)
+                and page.evaluate("document.querySelector('#viewer-card img').alt") == cap)
+        clip = page.evaluate("""() => { const n = document.getElementById('viewer-name'); const r = n.getBoundingClientRect();
+            return { left: r.left, right: r.right, vw: window.innerWidth, sw: n.scrollWidth, cw: n.clientWidth, sh: n.scrollHeight, ch: n.clientHeight }; }""")
+        fits = clip["left"] >= -1 and clip["right"] <= clip["vw"] + 1 and clip["sw"] <= clip["cw"] + 1 and clip["sh"] <= clip["ch"] + 2
+        all_ok = all_ok and good and fits
         if idx == 13:
             shot(page, "11_still_fullscreen.png")
             page.screenshot(path=os.path.join(SHOTS, "21_still_episode_only.png"))
             vb = page.locator("#viewer-name").bounding_box(); cb = page.locator("#viewer-count").bounding_box(); nb = page.locator("#viewer-card").bounding_box()
-            ok(vb["y"] - (nb["y"] + nb["height"]) < 120 and vb["y"] + vb["height"] < cb["y"], f"still full-screen: no empty gap where the caption used to be (name {vb['y'] - (nb['y'] + nb['height']):.0f}px below the card)")
+            ok(vb["y"] - (nb["y"] + nb["height"]) < 120 and vb["y"] + vb["height"] < cb["y"] and fits, f"still full-screen: caption wraps inside the screen, no clip (name {vb['y'] - (nb['y'] + nb['height']):.0f}px below the card, {clip})")
         page.click("#viewer-close")
-    ok(all_ok, "still full-screen: only 第 N 集 shown (no name / blurb / intro / old caption, alt = 第 N 集)")
+    ok(all_ok, "still full-screen: two lines 第 N 集 / 〈集名〉 (no scene name / blurb / intro, alt matches, no clip)")
 
     # ---- 21. reveal works for a 16:9 still ----
     page.evaluate("""() => {
@@ -923,17 +954,19 @@ with sync_playwright() as p:
         ok(foam(page) < 0.001, "16:9 still fully uncovered at 2:00")
     r = brush(page, "2026-11-12T08:00", speed=10, on_brush=still_check)
     b5 = [b for b in blurbs if b["file"] == "ep05_b.jpg"][0]
-    ok(r == "capture" and text(page, "#capture-name") == "第 5 集" and page.locator("#capture-blurb").is_hidden() and page.locator("#capture-intro").is_hidden(),
-       "still capture (earned view): only 第 5 集, blurb / intro hidden")
-    ok(not caption_leaks(page, b5) and page.evaluate("document.querySelector('#capture-front img').alt") == "第 5 集", f"still capture: old caption text not in the visible text or alt ({caption_leaks(page, b5)})")
+    s1_ep05 = episode_of(b5)
+    ok(r == "capture" and text(page, "#capture-name") == s1_ep05 and page.locator("#capture-blurb").is_hidden() and page.locator("#capture-intro").is_hidden(),
+       f"still capture (earned view): {s1_ep05}, blurb / intro hidden")
+    ok(not caption_leaks(page, b5, True) and page.evaluate("document.querySelector('#capture-front img').alt") == s1_ep05, f"still capture: scene name / intro not in the visible text or alt ({caption_leaks(page, b5, True)})")
     shot(page, "05b_capture_still.png")
     page.screenshot(path=os.path.join(SHOTS, "21b_capture_still_episode_only.png"))
     page.click("#btn-capture-done"); page.wait_for_selector("#screen-home.active")
-    # 時段外刷牙的幻燈片：只收集了劇照時，幻燈片逐張輪流顯示，每一張都只顯示集數
+    # 時段外刷牙的幻燈片：只收集了劇照時，每一張都是兩行「第 N 集」／「〈集名〉」
     page.evaluate("""() => { const st = { schema: 2, days: {}, pending: null, collected: [
         {id:'s1-still-ep05b',t:0,d:'2026-10-01',s:null},{id:'s1-still-ep03a',t:0,d:'2026-10-01',s:null},{id:'s1-still-ep12b',t:0,d:'2026-10-01',s:null}] };
         localStorage.setItem('momoke-brush-state-v1', JSON.stringify(st)); }""")
     by_file = {b["file"]: b for b in blurbs}
+    slide_expect = {episode_of(by_file[f]) for f in ("ep05_b.jpg", "ep03_a.jpg", "ep12_b.jpg")}
     def still_slide_check():
         wait_brushing(page)
         seen = []
@@ -941,9 +974,9 @@ with sync_playwright() as p:
             page.wait_for_timeout(250)
             seen.append(page.evaluate("[document.getElementById('slide-name').textContent, (document.querySelector('#slide-frame img') || {}).alt || '']"))
         names = {n for n, _ in seen}
-        good = all(re.fullmatch(r"第 \d+ 集", n) and n == a for n, a in seen)
-        leaks = [caption_leaks(page, by_file[f]) for f in ("ep05_b.jpg", "ep03_a.jpg", "ep12_b.jpg")]
-        ok(good and len(names) >= 2 and not any(leaks), f"slideshow of collected stills shows only 第 N 集 on every slide (saw {sorted(names)}), no old caption ({leaks})")
+        good = all(re.fullmatch(r"第 \d+ 集\n〈[^〉]+〉", n) and n == a and n in slide_expect for n, a in seen)
+        leaks = [caption_leaks(page, by_file[f], True) for f in ("ep05_b.jpg", "ep03_a.jpg", "ep12_b.jpg")]
+        ok(good and len(names) >= 2 and not any(leaks), f"slideshow of collected stills shows two-line 第 N 集 / 〈集名〉 on every slide (saw {sorted(names)}), no scene/intro leak ({leaks})")
         page.screenshot(path=os.path.join(SHOTS, "06b_slideshow_still.png"))
     brush(page, "2026-11-12T14:00", speed=10, on_brush=still_slide_check)
     page.click("#btn-result-home"); page.wait_for_selector("#screen-home.active")

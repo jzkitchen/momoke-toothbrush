@@ -735,6 +735,21 @@
     return out;
   }
 
+  // 劇照顯示文字。集數一律用 ep（「第 N 集」兩側留空）。
+  // 畫冊格子只要集數。檢視、獲得卡片、刷牙輪播是兩行：第一行集數，第二行「〈官方集名〉」。
+  // 集名只取 blurb「第N集〈標題〉」括號內的原文。解析不到就不猜集名（格子仍可顯示集數）。
+  var STILL_BLURB_RE = /^第(\d+)集〈([^〉]+)〉$/;
+  function stillGridCaption(item) {
+    if (!item || item.type !== "still" || item.ep == null || item.ep === "") return "";
+    return "第 " + item.ep + " 集";
+  }
+  function stillCaption(item) {
+    if (!item || item.type !== "still") return "";
+    var m = STILL_BLURB_RE.exec(item.blurb || "");
+    if (!m) return "";
+    return stillGridCaption(item) + "\n〈" + m[2] + "〉";
+  }
+
   return {
     SCHEMA: SCHEMA, BRUSH_MS: BRUSH_MS, ZONE_MS: ZONE_MS, DAY_START_HOUR: DAY_START_HOUR,
     byId: byId, dayKey: dayKey, slotOf: slotOf, ymd: ymd, SLOT_KEYS: SLOT_KEYS,
@@ -747,6 +762,7 @@
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,
     isHalloween: isHalloween, isChristmas: isChristmas, christmasFor: christmasFor,
-    songFor: songFor, normalizeSettings: normalizeSettings
+    songFor: songFor, normalizeSettings: normalizeSettings,
+    stillGridCaption: stillGridCaption, stillCaption: stillCaption
   };
 });
