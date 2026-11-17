@@ -15,6 +15,9 @@
  * 下一次刷牙出陽光公主（皇室→公主）；神聖公主在其餘非最終卡集齊後出；妖妖萌可（s2-m-20）最後。
  * 第三季《閃亮寶石》（76 張）：第二季集齊後開放；妖妖萌可變成愛心萌可（本季造型）→ s3-m-01 直接送出。
  * 下一次刷牙出鑽石公主；笑笑／信信／贊贊偏早，公主緊接其皇室萌可；寶石萌可與劇照在中段；奉獻萌可（s3-m-20）最後。
+ * 第四季《魔法鑰匙》（79 張）：第三季集齊後開放；奉獻萌可變成愛心萌可（本季造型）→ s4-m-00 直接送出。
+ * 下一次刷牙出花神公主；好好／熱情／誠實在第 24 張內連同公主出完；幸運與鑰匙萌可在窗口之後，暮光緊接幸運；
+ * 迷宮公主留到奉獻之前；奉獻萌可（s4-m-20）最後。
  * 進度資料格式仍是 schema 2，舊資料不用轉換（news 沒有就當作沒有；新卡為加項，不重設已收集的卡）。
  * 舊格式（schema 1）：days[k] = { m, e, cap, x }，由 migrateState() 轉換。
  */
@@ -342,6 +345,72 @@
   }
 
   /**
+   * 第四季抽卡（對齊第三季的早期窗口，但早期皇室只有好好／熱情／誠實）：
+   *  1) first（s4-m-00 愛心萌可本季造型；通常由 applyUnlocks 直接送出）
+   *  2) 皇室萌可已收集但公主未收集 → 公主
+   *     （花神←愛心、雪花←好好、太陽←熱情、彩雲←誠實、暮光←幸運）
+   *     迷宮公主對應最終的奉獻萌可，不走這條，否則要等奉獻先出，迷宮就永遠抽不到。
+   *  3) 好好／熱情／誠實尚未集齊時，只從她們和劇照裡抽（鑰匙萌可和幸運留到窗口之後）。
+   *     距離 earlyWindow 所剩格數 ≤ 2R（R = 未收集的早期皇室數，每位佔自己 + 公主）時必須抽皇室萌可；
+   *     否則皇室與劇照約各半，所以她們偏早，劇照仍會穿插。
+   *  4) 早期皇室都收集後、尚未到 earlyWindow：只抽劇照，讓幸運和鑰匙萌可留在窗口之後。
+   *  5) 窗口之後：鑰匙萌可、幸運萌可與剩下的劇照平均抽；抽到幸運後下一張是暮光公主。
+   *  6) 迷宮公主留到只剩她（奉獻前最後一張）。
+   *  7) finalItem 奉獻萌可（第 79 張）
+   */
+  function drawNextS4(collectedIds, rng) {
+    var S4 = season("s4");
+    var have = {};
+    collectedIds.forEach(function (id) { have[id] = true; });
+    var items = seasonItems("s4");
+    var finalId = S4.finalItem;
+    var finalItem = byId[finalId];
+    var heldPrincess = finalItem && finalItem.princess;
+    var nonFinal = items.filter(function (it) { return it.id !== finalId; });
+    var uncollectedNonFinal = nonFinal.filter(function (it) { return !have[it.id]; });
+
+    if (!uncollectedNonFinal.length) return have[finalId] ? null : finalId;
+
+    var s4Collected = collectedIds.filter(function (id) { return byId[id] && byId[id].season === "s4"; });
+    var n = s4Collected.length + 1;
+    if (S4.first && n <= S4.first.length && !have[S4.first[n - 1]]) return S4.first[n - 1];
+
+    for (var i = s4Collected.length - 1; i >= 0; i--) {
+      var it = byId[s4Collected[i]];
+      if (it && it.category === "royal" && it.princess && it.princess !== heldPrincess && !have[it.princess]) return it.princess;
+    }
+
+    // 早期皇室只有這三位。幸運（s4-m-04）和奉獻不在這裡，否則會被第三季那種「其餘皇室都算早期」拉進窗口。
+    var EARLY = { "s4-m-01": 1, "s4-m-02": 1, "s4-m-03": 1 };
+    var earlyLeft = uncollectedNonFinal.filter(function (it) { return EARLY[it.id]; });
+    var windowEnd = S4.earlyWindow || 24;
+    if (earlyLeft.length) {
+      var slotsLeft = windowEnd - s4Collected.length;
+      var need = earlyLeft.length * 2;
+      var stills = uncollectedNonFinal.filter(function (it) { return it.type === "still"; });
+      if (slotsLeft <= need || !stills.length) return pick(earlyLeft, rng).id;
+      var pool = stills.slice();
+      var copies = Math.max(1, Math.round(stills.length / earlyLeft.length));
+      earlyLeft.forEach(function (r) {
+        for (var k = 0; k < copies; k++) pool.push(r);
+      });
+      return pick(pool, rng).id;
+    }
+
+    if (s4Collected.length < windowEnd) {
+      var stillsOnly = uncollectedNonFinal.filter(function (it) { return it.type === "still"; });
+      if (stillsOnly.length) return pick(stillsOnly, rng).id;
+    }
+
+    var rest = uncollectedNonFinal.filter(function (it) { return it.type !== "princess"; });
+    if (!rest.length) {
+      var held = uncollectedNonFinal.filter(function (it) { return it.id === heldPrincess; });
+      return (held[0] || uncollectedNonFinal[0]).id;
+    }
+    return pick(rest, rng).id;
+  }
+
+  /**
    * 其他尚未實作特別規則的季度：first → 其餘平均抽 → finalItem 最後。
    */
   function drawNextGeneric(sid, collectedIds, rng) {
@@ -362,6 +431,7 @@
     if (sid === "s1") return drawNextS1(ids, rng);
     if (sid === "s2") return drawNextS2(ids, rng);
     if (sid === "s3") return drawNextS3(ids, rng);
+    if (sid === "s4") return drawNextS4(ids, rng);
     return drawNextGeneric(sid, ids, rng);
   }
 
@@ -671,7 +741,7 @@
     collectedSet: collectedSet, collectedIn: collectedIn, currentSeasonId: currentSeasonId,
     isSeasonComplete: isSeasonComplete, seasonUnlocked: seasonUnlocked, displaySeasonId: displaySeasonId,
     isUatMode: isUatMode, albumSeasonOpen: albumSeasonOpen, albumView: albumView,
-    applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNextS2: drawNextS2, drawNextS3: drawNextS3, drawNext: drawNext,
+    applyUnlocks: applyUnlocks, pendingNews: pendingNews, clearNews: clearNews, drawNextS1: drawNextS1, drawNextS2: drawNextS2, drawNextS3: drawNextS3, drawNextS4: drawNextS4, drawNext: drawNext,
     getDay: getDay, validPending: validPending, ensurePending: ensurePending, planBrush: planBrush,
     canEarn: canEarn, brushStartTs: brushStartTs,
     recordBrush: recordBrush, cardsOnDay: cardsOnDay, migrateState: migrateState,

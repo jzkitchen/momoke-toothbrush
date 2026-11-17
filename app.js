@@ -7,7 +7,7 @@
   var ZONES = ["上排左邊", "上排右邊", "下排左邊", "下排右邊"];
   var CHEERS = ["加油！", "刷得真好！", "慢慢刷乾淨！", "快完成了！"];
   var WEEKDAYS = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-  var TYPE_LABEL = { royal: "皇室萌可", magic: "魔方萌可", gem: "寶石萌可", villain: "反派萌可", princess: "公主", still: "劇照" };
+  var TYPE_LABEL = { royal: "皇室萌可", magic: "魔方萌可", gem: "寶石萌可", key: "鑰匙萌可", villain: "反派萌可", princess: "公主", still: "劇照" };
 
   // ---------- 測試用隱藏參數（只在 ?test=1 時生效，介面不會顯示） ----------
   var params = new URLSearchParams(location.search);
@@ -952,7 +952,7 @@
   $("unlock-album").addEventListener("click", function () { go("album"); });
 
   // ---------- 畫冊 ----------
-  // 上方「奇妙萌可 / 奇妙萌可第二季 / 閃亮寶石」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算。
+  // 上方「奇妙萌可 / 奇妙萌可第二季 / 閃亮寶石 / 魔法鑰匙」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算。
   // 未開放的季度顯示「🔒 … 敬請期待」，不能點。?uat=1 時每一季、每一張都可以翻看（不寫入收集進度）。
   var albumTab = "momoke";
   var albumSeason = "s1";
@@ -963,7 +963,7 @@
     var view = L.albumView(state, albumSeason, UAT);
     var rowById = {};
     view.items.forEach(function (row) { rowById[row.id] = row; });
-    var chips = [["album-season", "s1"], ["album-season-2", "s2"], ["album-season-3", "s3"]];
+    var chips = [["album-season", "s1"], ["album-season-2", "s2"], ["album-season-3", "s3"], ["album-season-4", "s4"]];
     chips.forEach(function (c) {
       var sid = c[1], chip = $(c[0]), open = L.albumSeasonOpen(state, sid, UAT), sdef = L.season(sid);
       chip.classList.toggle("on", open && sid === albumSeason);
@@ -1005,7 +1005,7 @@
       grid.appendChild(c);
     });
   }
-  ["album-season", "album-season-2", "album-season-3"].forEach(function (id) {
+  ["album-season", "album-season-2", "album-season-3", "album-season-4"].forEach(function (id) {
     $(id).addEventListener("click", function () {
       var sid = this.getAttribute("data-season");
       if (!L.albumSeasonOpen(state, sid, UAT)) return;
