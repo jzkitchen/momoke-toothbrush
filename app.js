@@ -82,7 +82,7 @@
     current = name;
     window.scrollTo(0, 0);
     if (name === "home") { renderHome(); homeMusic(); }
-    if (name === "album") { albumSeason = L.displaySeasonId(state); renderAlbum(); }
+    if (name === "album") { albumSeason = L.displaySeasonId(state); setSeasonMenu(false); renderAlbum(); }
     if (name === "calendar") { calMonth = null; renderCalendar(); }
   }
   document.addEventListener("click", function (e) {
@@ -952,26 +952,49 @@
   $("unlock-album").addEventListener("click", function () { go("album"); });
 
   // ---------- 畫冊 ----------
-  // 上方「奇妙萌可 / 奇妙萌可第二季 / 閃亮寶石 / 魔法鑰匙」切換；下面的 萌可 / 公主 / 劇照 分頁按季度各自計算。
-  // 未開放的季度顯示「🔒 … 敬請期待」，不能點。?uat=1 時每一季、每一張都可以翻看（不寫入收集進度）。
+  // 上方用下拉選單切換季度（收合時只顯示正在看的那一季和進度）。
+  // 未開放的季度仍列在清單裡，變灰且不能選（「🔒 … 敬請期待」）。?uat=1 時每一季都可以選，不寫入收集進度。
+  // 下面的 萌可 / 公主 / 劇照 分頁按季度各自計算。
   var albumTab = "momoke";
   var albumSeason = "s1";
+  var seasonMenuOpen = false;
   var TAB_NAMES = { momoke: "萌可", princess: "公主", still: "劇照" };
   function tabItems(tab, sid) { return L.seasonItems(sid || albumSeason).filter(function (it) { return it.type === tab; }); }
+  function seasonProgressText(sid) {
+    return seasonName(sid) + " " + L.collectedIn(state, sid).length + "／" + seasonTotal(sid);
+  }
+  function setSeasonMenu(open) {
+    seasonMenuOpen = !!open;
+    var list = $("album-season-list"), btn = $("album-season-current");
+    if (!list || !btn) return;
+    list.hidden = !seasonMenuOpen;
+    btn.setAttribute("aria-expanded", seasonMenuOpen ? "true" : "false");
+    btn.classList.toggle("open", seasonMenuOpen);
+  }
+  function renderSeasonMenu() {
+    var list = $("album-season-list");
+    list.innerHTML = "";
+    DATA.seasons.forEach(function (s) {
+      var open = L.albumSeasonOpen(state, s.id, UAT);
+      var b = el("button", "season-option" + (s.id === albumSeason ? " on" : ""));
+      b.type = "button";
+      b.setAttribute("role", "option");
+      b.setAttribute("data-season", s.id);
+      b.disabled = !open;
+      b.setAttribute("aria-disabled", open ? "false" : "true");
+      b.setAttribute("aria-selected", s.id === albumSeason ? "true" : "false");
+      b.textContent = open ? seasonProgressText(s.id) : "🔒 " + (s.lockedText || seasonName(s.id) + " 敬請期待");
+      list.appendChild(b);
+    });
+    $("album-season-label").textContent = seasonProgressText(albumSeason);
+    setSeasonMenu(seasonMenuOpen);
+  }
   function renderAlbum() {
     if (!L.albumSeasonOpen(state, albumSeason, UAT)) albumSeason = "s1";
     var view = L.albumView(state, albumSeason, UAT);
     var rowById = {};
     view.items.forEach(function (row) { rowById[row.id] = row; });
-    var chips = [["album-season", "s1"], ["album-season-2", "s2"], ["album-season-3", "s3"], ["album-season-4", "s4"]];
-    chips.forEach(function (c) {
-      var sid = c[1], chip = $(c[0]), open = L.albumSeasonOpen(state, sid, UAT), sdef = L.season(sid);
-      chip.classList.toggle("on", open && sid === albumSeason);
-      chip.classList.toggle("locked", !open);
-      chip.disabled = !open;
-      chip.setAttribute("aria-selected", open && sid === albumSeason ? "true" : "false");
-      chip.textContent = open ? seasonName(sid) + " " + L.collectedIn(state, sid).length + " / " + seasonTotal(sid) : "🔒 " + (sdef.lockedText || seasonName(sid) + " 敬請期待");
-    });
+    renderSeasonMenu();
     var banner = $("uat-banner");
     if (banner) banner.hidden = !UAT;
     document.querySelectorAll(".tab").forEach(function (t) {
@@ -1005,13 +1028,22 @@
       grid.appendChild(c);
     });
   }
-  ["album-season", "album-season-2", "album-season-3", "album-season-4"].forEach(function (id) {
-    $(id).addEventListener("click", function () {
-      var sid = this.getAttribute("data-season");
-      if (!L.albumSeasonOpen(state, sid, UAT)) return;
-      albumSeason = sid; renderAlbum();
-    });
+  $("album-season-current").addEventListener("click", function (e) {
+    e.stopPropagation();
+    setSeasonMenu(!seasonMenuOpen);
   });
+  $("album-season-list").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var btn = e.target.closest("button[data-season]");
+    if (!btn || btn.disabled) return;
+    var sid = btn.getAttribute("data-season");
+    if (!L.albumSeasonOpen(state, sid, UAT)) return;
+    albumSeason = sid;
+    setSeasonMenu(false);
+    renderAlbum();
+  });
+  document.addEventListener("click", function () { if (seasonMenuOpen) setSeasonMenu(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && seasonMenuOpen) setSeasonMenu(false); });
   $("uat-exit").addEventListener("click", function () {
     var u = new URL(location.href);
     u.searchParams.delete("uat");

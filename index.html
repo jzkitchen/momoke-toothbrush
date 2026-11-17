@@ -151,11 +151,12 @@
       <span class="head-spacer"></span>
     </header>
     <p class="uat-banner" id="uat-banner" hidden>預覽模式：可以翻看全部季度和卡片，不會改收集進度。<button type="button" id="uat-exit">離開預覽</button></p>
-    <div class="season-bar" role="tablist" aria-label="季度">
-      <button class="season-chip on" id="album-season" data-season="s1" role="tab" type="button">奇妙萌可 0 / 81</button>
-      <button class="season-chip locked" id="album-season-2" data-season="s2" role="tab" type="button">🔒 奇妙萌可第二季 敬請期待</button>
-      <button class="season-chip locked" id="album-season-3" data-season="s3" role="tab" type="button">🔒 閃亮寶石 敬請期待</button>
-      <button class="season-chip locked" id="album-season-4" data-season="s4" role="tab" type="button">🔒 魔法鑰匙 敬請期待</button>
+    <div class="season-menu" id="season-menu">
+      <button class="season-current" id="album-season-current" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="album-season-list">
+        <span id="album-season-label">奇妙萌可 0／81</span>
+        <span class="season-caret" aria-hidden="true"></span>
+      </button>
+      <div class="season-list" id="album-season-list" role="listbox" aria-label="季度" hidden></div>
     </div>
     <div class="tabs" role="tablist">
       <button class="tab active" data-tab="momoke" role="tab" type="button">萌可</button>
