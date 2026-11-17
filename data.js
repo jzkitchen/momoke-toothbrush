@@ -4,7 +4,8 @@
  * 第一季共 81 張：24 萌可 + 5 公主 + 52 劇照。
  * 第二季共 74 張：20 萌可 + 2 公主 + 52 劇照。第一季集齊後開放，鬧鬧萌可變成幸福萌可（第二季第 1 張，直接送）。
  * 第三季《閃亮寶石》共 76 張：20 萌可 + 4 公主 + 52 劇照。第二季集齊後開放，妖妖萌可變成愛心萌可本季造型（第三季第 1 張，直接送）。
- * 畫冊晶片標題（用戶確認）：s1 奇妙萌可、s2 奇妙萌可第二季、s3 閃亮寶石。未來 s4 標題預留：魔法鑰匙（本版不加第四季資料）。
+ * 第四季《魔法鑰匙》共 79 張：21 萌可 + 6 公主 + 52 劇照。第三季集齊後開放，奉獻萌可變成愛心萌可本季造型（第四季第 1 張，直接送）。
+ * 畫冊晶片標題（用戶確認）：s1 奇妙萌可、s2 奇妙萌可第二季、s3 閃亮寶石、s4 魔法鑰匙。
  * 要更換圖片：
  *   1. 把圖片放進 img/s1/、img/princess/ 或 img/stills/（檔名見 README.md）
  *   2. 在下面對應項目設定 img（例如 "img/stills/ep01_a.jpg"）；沒有圖片時為 null
@@ -15,7 +16,7 @@
  *   id       唯一代號（不可更改，已收集的紀錄靠它對應）
  *   season   "s1" / "s2" …
  *   type     "momoke" | "princess" | "still"   → 畫冊分頁：萌可 / 公主 / 劇照
- *   category （只限萌可）"royal" 皇室萌可 | "magic" 魔方萌可 | "gem" 寶石萌可 | "villain" 反派萌可
+ *   category （只限萌可）"royal" 皇室萌可 | "magic" 魔方萌可 | "gem" 寶石萌可 | "key" 鑰匙萌可 | "villain" 反派萌可
  *   princess （只限皇室萌可）對應公主的 id
  *   royal    （只限公主）對應皇室萌可的 id
  *   ep       （只限劇照）集數
@@ -28,7 +29,7 @@
 (function (root) {
   var DATA = {
     // App 版本（主頁底部的小字）。每次更新時，這裡和 sw.js 的 VERSION 一起加一（兩者必須相同，tests/draw.test.js 會檢查）
-    version: "v20",
+    version: "v21",
 
     // 萬聖節期間覆寫（每年 10 月 28–31 日，以 Asia/Hong_Kong 日曆判斷；見 logic.js isHalloween / songFor）：
     // 首頁吉祥物改官方專輯封面；首頁音樂與刷牙音樂都改播萬聖節歌。其他日子不變。
@@ -135,7 +136,6 @@
         // first：第 1 張固定；下一次刷牙依皇室→公主出鑽石公主。
         // 笑笑／信信／贊贊（不在 first 的皇室萌可）偏早，並在 earlyWindow 張內連同公主出完；
         // 其餘寶石萌可與劇照在中段平均抽；finalItem（奉獻萌可）放最後（第 76 張）。抽卡見 logic.js drawNextS3。
-        // 未來第四季畫冊標題預留：魔法鑰匙（本版不加資料）。
         id: "s3",
         name: "閃亮寶石",
         open: true,
@@ -150,6 +150,29 @@
         music: {
           op: { src: "audio/s3_gem_op.m4a", type: "audio/mp4", title: "閃亮寶石", duration: 55.8 },
           home: { src: "audio/s3_gem_ed.m4a", type: "audio/mp4", title: "閃亮寶石", instrumental: true, duration: 20.0 }
+        }
+      },
+      {
+        // 第四季《魔法鑰匙》：第三季集齊（76 張）後才開放（logic.js seasonUnlocked / applyUnlocks）。
+        // transform：集齊第三季後，奉獻萌可變成愛心萌可（本季花飾造型）→ 第四季第 1 張（s4-m-00）直接送出（不用刷牙）。
+        // first：第 1 張固定；下一次刷牙依皇室→公主出花神公主。
+        // 好好／熱情／誠實（early）偏早，並在 earlyWindow 張內連同公主出完；幸運不在這組。
+        // 幸運與鑰匙萌可、剩下的劇照在窗口之後平均抽，暮光公主緊接幸運。
+        // 迷宮公主不進普通池，留到其餘非最終卡集齊後（奉獻前最後）；finalItem（奉獻萌可）放最後（第 79 張）。抽卡見 logic.js drawNextS4。
+        id: "s4",
+        name: "魔法鑰匙",
+        open: true,
+        total: 79,
+        first: ["s4-m-00"],
+        earlyWindow: 24,                 // 第 24 張前出完好好、熱情、誠實和雪花、太陽、彩雲
+        finalItem: "s4-m-20",            // 最後一張（第 79 張）：奉獻萌可
+        completeTitle: "恭喜集齊魔法鑰匙！",
+        lockedText: "魔法鑰匙 敬請期待",   // 第三季未集齊時，畫冊的第四季分頁顯示這句
+        transform: { from: "s3-m-20", to: "s4-m-00" },
+        // 刷牙播片頭曲（有人聲）；首頁播片尾曲純音樂（短循環）。萬聖節與聖誕期間仍由 logic.js songFor 覆寫。
+        music: {
+          op: { src: "audio/s4_op.m4a", type: "audio/mp4", title: "魔法鑰匙", duration: 57.934 },
+          home: { src: "audio/s4_ed.m4a", type: "audio/mp4", title: "魔法鑰匙", instrumental: true, duration: 18.088 }
         }
       }
     ],
@@ -419,6 +442,91 @@
     { id: "s3-still-ep25b", season: "s3", type: "still", ep: 25, name: "陷入危機的愛心萌可", img: "img/s3_gem_stills/ep25_b.jpg", blurb: "第25集〈陷入危機的愛心萌可〉", intro: "" },
     { id: "s3-still-ep26a", season: "s3", type: "still", ep: 26, name: "寶石森林恢復如初", img: "img/s3_gem_stills/ep26_a.jpg", blurb: "第26集〈寶石森林恢復如初〉", intro: "" },
     { id: "s3-still-ep26b", season: "s3", type: "still", ep: 26, name: "寶石森林恢復如初", img: "img/s3_gem_stills/ep26_b.jpg", blurb: "第26集〈寶石森林恢復如初〉", intro: "" },
+
+    // ---- 第四季《魔法鑰匙》：21 萌可（圖片來自 img/s4/；簡介為已確認 blurbs_draft.json 原文）----
+    { id: "s4-m-00", season: "s4", type: "momoke", category: "royal", name: "愛心萌可", img: "img/s4/00_aixin_s3.jpg", blurb: "本季換成花飾與蓬裙，拿著香水瓶，善良又重感情，句尾「啾」！", princess: "s4-p-01" },
+    { id: "s4-m-01", season: "s4", type: "momoke", category: "royal", name: "好好萌可", img: "img/s4/01_haohao.jpg", blurb: "溫柔體貼又愛和平，抱著雪人玩偶，句尾「好好」！", princess: "s4-p-04" },
+    { id: "s4-m-02", season: "s4", type: "momoke", category: "royal", name: "熱情萌可", img: "img/s4/02_reqing.jpg", blurb: "充滿熱情卻有點急性子，拿著手鏡，句尾「啦啦」！", princess: "s4-p-02" },
+    { id: "s4-m-03", season: "s4", type: "momoke", category: "royal", name: "誠實萌可", img: "img/s4/03_chengshi.jpg", blurb: "愛發牢騷卻很誠實，拿著棉花糖，句尾「誠實」！", princess: "s4-p-03" },
+    { id: "s4-m-04", season: "s4", type: "momoke", category: "royal", name: "幸運萌可", img: "img/s4/04_xingyun.jpg", blurb: "代表幸運，拿著幸運魔杖，起初被關在箱子裏。", princess: "s4-p-05" },
+    { id: "s4-m-05", season: "s4", type: "momoke", category: "key", name: "快快萌可", img: "img/s4/05_kuaikuai.jpg", blurb: "做事總想快一點，拿著懷錶，句尾「快點」！" },
+    { id: "s4-m-06", season: "s4", type: "momoke", category: "key", name: "吞吞萌可", img: "img/s4/06_tuntun.jpg", blurb: "最愛吃美食，拿著叉子和盤子，句尾「吞吞」！" },
+    { id: "s4-m-07", season: "s4", type: "momoke", category: "key", name: "滅火萌可", img: "img/s4/07_miehuo.jpg", blurb: "很有責任心的小消防員，拿著滅火器，句尾「滅火」！" },
+    { id: "s4-m-08", season: "s4", type: "momoke", category: "key", name: "醫生萌可", img: "img/s4/08_yisheng.jpg", blurb: "懵懵懂懂卻很關心病人，拿著醫藥箱，句尾「嗶卟」！" },
+    { id: "s4-m-09", season: "s4", type: "momoke", category: "key", name: "加油萌可", img: "img/s4/09_jiayou.jpg", blurb: "最愛為大家加油，拿著綵帶球，句尾「加油」！" },
+    { id: "s4-m-10", season: "s4", type: "momoke", category: "key", name: "修理萌可", img: "img/s4/10_xiuli.jpg", blurb: "最愛修理東西，拿著扳手和工具箱，句尾「修理」！" },
+    { id: "s4-m-11", season: "s4", type: "momoke", category: "key", name: "發明萌可", img: "img/s4/11_faming.jpg", blurb: "愛嘗試新藥劑，拿著燒瓶和魔法杖，句尾「發明」！" },
+    { id: "s4-m-12", season: "s4", type: "momoke", category: "key", name: "時尚萌可", img: "img/s4/12_shishang.jpg", blurb: "最愛設計衣服，拿著捲尺和人台模型，句尾「時尚」！" },
+    { id: "s4-m-13", season: "s4", type: "momoke", category: "key", name: "警察萌可", img: "img/s4/13_jingcha.jpg", blurb: "很有正義感，拿著警哨和擴音器，句尾「站住」！" },
+    { id: "s4-m-14", season: "s4", type: "momoke", category: "key", name: "人魚萌可", img: "img/s4/14_renyu.jpg", blurb: "最愛自由自在地游泳，拿著海螺，句尾「人魚」！" },
+    { id: "s4-m-15", season: "s4", type: "momoke", category: "key", name: "派對萌可", img: "img/s4/15_paidui.jpg", blurb: "最愛開派對，拿著派對喇叭和氣球，句尾「派對」！" },
+    { id: "s4-m-16", season: "s4", type: "momoke", category: "key", name: "美髮萌可", img: "img/s4/16_meifa.jpg", blurb: "最愛幫忙做造型，拿著剪刀和梳子，句尾「剪剪」！" },
+    { id: "s4-m-17", season: "s4", type: "momoke", category: "key", name: "氣氣萌可", img: "img/s4/17_qiqi.jpg", blurb: "容易生氣，拿著棒棒糖，句尾「氣氣」！" },
+    { id: "s4-m-18", season: "s4", type: "momoke", category: "key", name: "歌聲萌可", img: "img/s4/18_gesheng.jpg", blurb: "最愛唱歌拉琴，拿著小提琴和樂譜，句尾「啊啊」！" },
+    { id: "s4-m-19", season: "s4", type: "momoke", category: "key", name: "滑冰萌可", img: "img/s4/19_huabing.jpg", blurb: "很優美的滑冰選手，拿著陀螺，句尾「轉轉」！" },
+    { id: "s4-m-20", season: "s4", type: "momoke", category: "royal", name: "奉獻萌可", img: "img/s4/20_fengxian.jpg", blurb: "本季拿著黑珍珠權杖，很疼愛珍珠，句尾「棒棒」！", princess: "s4-p-06" },
+
+    // ---- 第四季：6 公主（圖片來自 img/s4_princess/；一句話簡介，對齊第三季）----
+    { id: "s4-p-01", season: "s4", type: "princess", name: "花神公主", royal: "s4-m-00", img: "img/s4_princess/01_huashen.jpg", blurb: "樂美和愛心萌可一起變身成花神公主！" },
+    { id: "s4-p-02", season: "s4", type: "princess", name: "太陽公主", royal: "s4-m-02", img: "img/s4_princess/02_taiyang.jpg", blurb: "樂美和熱情萌可一起變身成太陽公主！" },
+    { id: "s4-p-03", season: "s4", type: "princess", name: "彩雲公主", royal: "s4-m-03", img: "img/s4_princess/03_caiyun.jpg", blurb: "樂美和誠實萌可一起變身成彩雲公主！" },
+    { id: "s4-p-04", season: "s4", type: "princess", name: "雪花公主", royal: "s4-m-01", img: "img/s4_princess/04_xuehua.jpg", blurb: "樂美和好好萌可一起變身成雪花公主！" },
+    { id: "s4-p-05", season: "s4", type: "princess", name: "暮光公主", royal: "s4-m-04", img: "img/s4_princess/05_muguang.jpg", blurb: "樂美和幸運萌可一起變身成暮光公主！" },
+    { id: "s4-p-06", season: "s4", type: "princess", name: "迷宮公主", royal: "s4-m-20", img: "img/s4_princess/06_migong.jpg", blurb: "樂美和奉獻萌可一起變身成迷宮公主！" },
+
+    // ---- 第四季：52 張劇照（每集 a、b 兩張）。畫面上只顯示「第 N 集」；name / blurb 保留集數標題 ----
+    { id: "s4-still-ep01a", season: "s4", type: "still", ep: 1, name: "迷迷糊糊，鑰匙萌可", img: "img/s4_stills/ep01_a.jpg", blurb: "第1集〈迷迷糊糊，鑰匙萌可〉", intro: "" },
+    { id: "s4-still-ep01b", season: "s4", type: "still", ep: 1, name: "迷迷糊糊，鑰匙萌可", img: "img/s4_stills/ep01_b.jpg", blurb: "第1集〈迷迷糊糊，鑰匙萌可〉", intro: "" },
+    { id: "s4-still-ep02a", season: "s4", type: "still", ep: 2, name: "變身！花神公主", img: "img/s4_stills/ep02_a.jpg", blurb: "第2集〈變身！花神公主〉", intro: "" },
+    { id: "s4-still-ep02b", season: "s4", type: "still", ep: 2, name: "變身！花神公主", img: "img/s4_stills/ep02_b.jpg", blurb: "第2集〈變身！花神公主〉", intro: "" },
+    { id: "s4-still-ep03a", season: "s4", type: "still", ep: 3, name: "暴食很危險，吞吞", img: "img/s4_stills/ep03_a.jpg", blurb: "第3集〈暴食很危險，吞吞〉", intro: "" },
+    { id: "s4-still-ep03b", season: "s4", type: "still", ep: 3, name: "暴食很危險，吞吞", img: "img/s4_stills/ep03_b.jpg", blurb: "第3集〈暴食很危險，吞吞〉", intro: "" },
+    { id: "s4-still-ep04a", season: "s4", type: "still", ep: 4, name: "火熱滾燙的露營事件", img: "img/s4_stills/ep04_a.jpg", blurb: "第4集〈火熱滾燙的露營事件〉", intro: "" },
+    { id: "s4-still-ep04b", season: "s4", type: "still", ep: 4, name: "火熱滾燙的露營事件", img: "img/s4_stills/ep04_b.jpg", blurb: "第4集〈火熱滾燙的露營事件〉", intro: "" },
+    { id: "s4-still-ep05a", season: "s4", type: "still", ep: 5, name: "讓我來治癒你", img: "img/s4_stills/ep05_a.jpg", blurb: "第5集〈讓我來治癒你〉", intro: "" },
+    { id: "s4-still-ep05b", season: "s4", type: "still", ep: 5, name: "讓我來治癒你", img: "img/s4_stills/ep05_b.jpg", blurb: "第5集〈讓我來治癒你〉", intro: "" },
+    { id: "s4-still-ep06a", season: "s4", type: "still", ep: 6, name: "萌可醫院成立了", img: "img/s4_stills/ep06_a.jpg", blurb: "第6集〈萌可醫院成立了〉", intro: "" },
+    { id: "s4-still-ep06b", season: "s4", type: "still", ep: 6, name: "萌可醫院成立了", img: "img/s4_stills/ep06_b.jpg", blurb: "第6集〈萌可醫院成立了〉", intro: "" },
+    { id: "s4-still-ep07a", season: "s4", type: "still", ep: 7, name: "加油加油，需要鼓勵", img: "img/s4_stills/ep07_a.jpg", blurb: "第7集〈加油加油，需要鼓勵〉", intro: "" },
+    { id: "s4-still-ep07b", season: "s4", type: "still", ep: 7, name: "加油加油，需要鼓勵", img: "img/s4_stills/ep07_b.jpg", blurb: "第7集〈加油加油，需要鼓勵〉", intro: "" },
+    { id: "s4-still-ep08a", season: "s4", type: "still", ep: 8, name: "幫我修好，修理萌可", img: "img/s4_stills/ep08_a.jpg", blurb: "第8集〈幫我修好，修理萌可〉", intro: "" },
+    { id: "s4-still-ep08b", season: "s4", type: "still", ep: 8, name: "幫我修好，修理萌可", img: "img/s4_stills/ep08_b.jpg", blurb: "第8集〈幫我修好，修理萌可〉", intro: "" },
+    { id: "s4-still-ep09a", season: "s4", type: "still", ep: 9, name: "樂美和愛心萌可的身體互換了", img: "img/s4_stills/ep09_a.jpg", blurb: "第9集〈樂美和愛心萌可的身體互換了〉", intro: "" },
+    { id: "s4-still-ep09b", season: "s4", type: "still", ep: 9, name: "樂美和愛心萌可的身體互換了", img: "img/s4_stills/ep09_b.jpg", blurb: "第9集〈樂美和愛心萌可的身體互換了〉", intro: "" },
+    { id: "s4-still-ep10a", season: "s4", type: "still", ep: 10, name: "白雪樂美", img: "img/s4_stills/ep10_a.jpg", blurb: "第10集〈白雪樂美〉", intro: "" },
+    { id: "s4-still-ep10b", season: "s4", type: "still", ep: 10, name: "白雪樂美", img: "img/s4_stills/ep10_b.jpg", blurb: "第10集〈白雪樂美〉", intro: "" },
+    { id: "s4-still-ep11a", season: "s4", type: "still", ep: 11, name: "時尚萌可的服裝設計", img: "img/s4_stills/ep11_a.jpg", blurb: "第11集〈時尚萌可的服裝設計〉", intro: "" },
+    { id: "s4-still-ep11b", season: "s4", type: "still", ep: 11, name: "時尚萌可的服裝設計", img: "img/s4_stills/ep11_b.jpg", blurb: "第11集〈時尚萌可的服裝設計〉", intro: "" },
+    { id: "s4-still-ep12a", season: "s4", type: "still", ep: 12, name: "給我站住，警察萌可", img: "img/s4_stills/ep12_a.jpg", blurb: "第12集〈給我站住，警察萌可〉", intro: "" },
+    { id: "s4-still-ep12b", season: "s4", type: "still", ep: 12, name: "給我站住，警察萌可", img: "img/s4_stills/ep12_b.jpg", blurb: "第12集〈給我站住，警察萌可〉", intro: "" },
+    { id: "s4-still-ep13a", season: "s4", type: "still", ep: 13, name: "會闖禍的幸運餅乾", img: "img/s4_stills/ep13_a.jpg", blurb: "第13集〈會闖禍的幸運餅乾〉", intro: "" },
+    { id: "s4-still-ep13b", season: "s4", type: "still", ep: 13, name: "會闖禍的幸運餅乾", img: "img/s4_stills/ep13_b.jpg", blurb: "第13集〈會闖禍的幸運餅乾〉", intro: "" },
+    { id: "s4-still-ep14a", season: "s4", type: "still", ep: 14, name: "撲通撲通，人魚萌可", img: "img/s4_stills/ep14_a.jpg", blurb: "第14集〈撲通撲通，人魚萌可〉", intro: "" },
+    { id: "s4-still-ep14b", season: "s4", type: "still", ep: 14, name: "撲通撲通，人魚萌可", img: "img/s4_stills/ep14_b.jpg", blurb: "第14集〈撲通撲通，人魚萌可〉", intro: "" },
+    { id: "s4-still-ep15a", season: "s4", type: "still", ep: 15, name: "來場華麗的派對吧", img: "img/s4_stills/ep15_a.jpg", blurb: "第15集〈來場華麗的派對吧〉", intro: "" },
+    { id: "s4-still-ep15b", season: "s4", type: "still", ep: 15, name: "來場華麗的派對吧", img: "img/s4_stills/ep15_b.jpg", blurb: "第15集〈來場華麗的派對吧〉", intro: "" },
+    { id: "s4-still-ep16a", season: "s4", type: "still", ep: 16, name: "做個好髮型，美髮萌可", img: "img/s4_stills/ep16_a.jpg", blurb: "第16集〈做個好髮型，美髮萌可〉", intro: "" },
+    { id: "s4-still-ep16b", season: "s4", type: "still", ep: 16, name: "做個好髮型，美髮萌可", img: "img/s4_stills/ep16_b.jpg", blurb: "第16集〈做個好髮型，美髮萌可〉", intro: "" },
+    { id: "s4-still-ep17a", season: "s4", type: "still", ep: 17, name: "爸爸的照相機", img: "img/s4_stills/ep17_a.jpg", blurb: "第17集〈爸爸的照相機〉", intro: "" },
+    { id: "s4-still-ep17b", season: "s4", type: "still", ep: 17, name: "爸爸的照相機", img: "img/s4_stills/ep17_b.jpg", blurb: "第17集〈爸爸的照相機〉", intro: "" },
+    { id: "s4-still-ep18a", season: "s4", type: "still", ep: 18, name: "要耍小脾氣，氣氣萌可", img: "img/s4_stills/ep18_a.jpg", blurb: "第18集〈要耍小脾氣，氣氣萌可〉", intro: "" },
+    { id: "s4-still-ep18b", season: "s4", type: "still", ep: 18, name: "要耍小脾氣，氣氣萌可", img: "img/s4_stills/ep18_b.jpg", blurb: "第18集〈要耍小脾氣，氣氣萌可〉", intro: "" },
+    { id: "s4-still-ep19a", season: "s4", type: "still", ep: 19, name: "尋找樂美的項鍊", img: "img/s4_stills/ep19_a.jpg", blurb: "第19集〈尋找樂美的項鍊〉", intro: "" },
+    { id: "s4-still-ep19b", season: "s4", type: "still", ep: 19, name: "尋找樂美的項鍊", img: "img/s4_stills/ep19_b.jpg", blurb: "第19集〈尋找樂美的項鍊〉", intro: "" },
+    { id: "s4-still-ep20a", season: "s4", type: "still", ep: 20, name: "唱歌的歌聲萌可", img: "img/s4_stills/ep20_a.jpg", blurb: "第20集〈唱歌的歌聲萌可〉", intro: "" },
+    { id: "s4-still-ep20b", season: "s4", type: "still", ep: 20, name: "唱歌的歌聲萌可", img: "img/s4_stills/ep20_b.jpg", blurb: "第20集〈唱歌的歌聲萌可〉", intro: "" },
+    { id: "s4-still-ep21a", season: "s4", type: "still", ep: 21, name: "大家一起來玩吧，萌可遊樂園", img: "img/s4_stills/ep21_a.jpg", blurb: "第21集〈大家一起來玩吧，萌可遊樂園〉", intro: "" },
+    { id: "s4-still-ep21b", season: "s4", type: "still", ep: 21, name: "大家一起來玩吧，萌可遊樂園", img: "img/s4_stills/ep21_b.jpg", blurb: "第21集〈大家一起來玩吧，萌可遊樂園〉", intro: "" },
+    { id: "s4-still-ep22a", season: "s4", type: "still", ep: 22, name: "滑著冰，轉圈圈", img: "img/s4_stills/ep22_a.jpg", blurb: "第22集〈滑著冰，轉圈圈〉", intro: "" },
+    { id: "s4-still-ep22b", season: "s4", type: "still", ep: 22, name: "滑著冰，轉圈圈", img: "img/s4_stills/ep22_b.jpg", blurb: "第22集〈滑著冰，轉圈圈〉", intro: "" },
+    { id: "s4-still-ep23a", season: "s4", type: "still", ep: 23, name: "幸運萌可，登場！", img: "img/s4_stills/ep23_a.jpg", blurb: "第23集〈幸運萌可，登場！〉", intro: "" },
+    { id: "s4-still-ep23b", season: "s4", type: "still", ep: 23, name: "幸運萌可，登場！", img: "img/s4_stills/ep23_b.jpg", blurb: "第23集〈幸運萌可，登場！〉", intro: "" },
+    { id: "s4-still-ep24a", season: "s4", type: "still", ep: 24, name: "萌可時裝秀", img: "img/s4_stills/ep24_a.jpg", blurb: "第24集〈萌可時裝秀〉", intro: "" },
+    { id: "s4-still-ep24b", season: "s4", type: "still", ep: 24, name: "萌可時裝秀", img: "img/s4_stills/ep24_b.jpg", blurb: "第24集〈萌可時裝秀〉", intro: "" },
+    { id: "s4-still-ep25a", season: "s4", type: "still", ep: 25, name: "危機一觸即發，秘鑰之境", img: "img/s4_stills/ep25_a.jpg", blurb: "第25集〈危機一觸即發，秘鑰之境〉", intro: "" },
+    { id: "s4-still-ep25b", season: "s4", type: "still", ep: 25, name: "危機一觸即發，秘鑰之境", img: "img/s4_stills/ep25_b.jpg", blurb: "第25集〈危機一觸即發，秘鑰之境〉", intro: "" },
+    { id: "s4-still-ep26a", season: "s4", type: "still", ep: 26, name: "再見，鑰匙萌可", img: "img/s4_stills/ep26_a.jpg", blurb: "第26集〈再見，鑰匙萌可〉", intro: "" },
+    { id: "s4-still-ep26b", season: "s4", type: "still", ep: 26, name: "再見，鑰匙萌可", img: "img/s4_stills/ep26_b.jpg", blurb: "第26集〈再見，鑰匙萌可〉", intro: "" },
     ]
   };
 

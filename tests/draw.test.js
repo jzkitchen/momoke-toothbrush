@@ -884,7 +884,7 @@ console.log("✓ 日子與時段");
       ok(seq.length <= S3TOTAL, "不可多於 76 張");
     }
     checkS3(seq, "模擬 " + run);
-    eq(L.currentSeasonId(st), null, "三季集齊後不再抽");
+    eq(L.currentSeasonId(st), "s4", "第三季集齊後進入第四季");
     EARLY.forEach((id) => { earlyPos += seq.indexOf(id) + 1; earlyN++; });
     seq.forEach((id, i) => { if (L.byId[id].category === "gem") { gemPos += i + 1; gemN++; } });
     const earlyIds = new Set(Object.keys(PAIRS).concat(Object.values(PAIRS)));
@@ -921,15 +921,16 @@ console.log("✓ 日子與時段");
     s3.filter((i) => i.id !== S3FINAL && i.id !== "s3-m-01").forEach((i) => st.collected.push({ id: i.id, t: 0, d: null, s: null }));
     eq(L.collectedIn(st, "s3").length, 75);
     const r = L.recordBrush(st, T("2027-02-01T08:00"), T("2027-02-01T08:02"), rng(9));
-    eq(r.item.id, S3FINAL); eq(r.number, 76); eq(r.seasonComplete, "s3"); eq(r.unlock, null);
-    const pc = L.planBrush(st, T("2027-02-01T20:00")); ok(!pc.earn && pc.reason === "complete");
-    eq(L.recordBrush(st, T("2027-02-01T20:00"), T("2027-02-01T20:02")).kind, "all-done");
+    eq(r.item.id, S3FINAL); eq(r.number, 76); eq(r.seasonComplete, "s3");
+    eq(r.unlock && r.unlock.item.id, "s4-m-00", "集齊第三季時送出第四季愛心萌可");
+    eq(r.unlock.from.id, "s3-m-20");
+    const pc = L.planBrush(st, T("2027-02-01T20:00")); ok(pc.earn && pc.id === "s4-p-01", "下一張是花神公主");
     const hw = Date.UTC(2026, 9, 28, 4);
     eq(L.songFor(st, "op", hw).src, "audio/halloween.m4a", "萬聖節覆寫刷牙歌");
     eq(L.songFor(st, "home", hw).src, "audio/halloween.m4a", "萬聖節覆寫首頁歌");
     eq(L.songFor(st, "home", hw).season, "halloween");
-    eq(L.songFor(st, "op", Date.UTC(2026, 9, 23, 4)).src, "audio/s3_gem_op.m4a");
-    eq(L.songFor(st, "home", Date.UTC(2026, 9, 23, 4)).src, "audio/s3_gem_ed.m4a"); }
+    eq(L.songFor(st, "op", Date.UTC(2026, 9, 23, 4)).src, "audio/s4_op.m4a", "進入第四季後刷牙播魔法鑰匙");
+    eq(L.songFor(st, "home", Date.UTC(2026, 9, 23, 4)).src, "audio/s4_ed.m4a"); }
   console.log("✓ 第三季：76 張、愛心第 1、鑽石第 2、笑笑／信信／贊贊偏早且公主緊接、寶石萌可中段、劇照穿插、奉獻最後、第二季集齊後贈送、舊進度保留、萬聖節仍覆寫");
 }
 
@@ -986,5 +987,479 @@ console.log("✓ 日子與時段");
   eq(mixedUat.items.filter((row) => row.revealed).length, 81);
   eq(mixedUat.items.filter((row) => row.collected).length, 1, "預覽不把未收集的卡算成已收集");
   console.log("✓ 家長預覽 ?uat=1：可翻看全部季度和卡片，不改收集進度");
+}
+// ---- 第四季《魔法鑰匙》（79 張 = 21 萌可 + 6 公主 + 52 劇照）----
+{
+  const crypto = require("crypto");
+  const s4 = DATA.items.filter((i) => i.season === "s4");
+  const S4 = L.season("s4") || {};
+  const S4TOTAL = 79, S4FINAL = "s4-m-20", HELD = "s4-p-06", LATE = "s4-m-04", LATE_P = "s4-p-05";
+  const EARLY = ["s4-m-01", "s4-m-02", "s4-m-03"];
+  const PAIRS = { "s4-m-00": "s4-p-01", "s4-m-01": "s4-p-04", "s4-m-02": "s4-p-02", "s4-m-03": "s4-p-03", "s4-m-04": "s4-p-05", "s4-m-20": "s4-p-06" };
+  const MOM_BLURB = {
+  "s4-m-00": "本季換成花飾與蓬裙，拿著香水瓶，善良又重感情，句尾「啾」！",
+  "s4-m-01": "溫柔體貼又愛和平，抱著雪人玩偶，句尾「好好」！",
+  "s4-m-02": "充滿熱情卻有點急性子，拿著手鏡，句尾「啦啦」！",
+  "s4-m-03": "愛發牢騷卻很誠實，拿著棉花糖，句尾「誠實」！",
+  "s4-m-04": "代表幸運，拿著幸運魔杖，起初被關在箱子裏。",
+  "s4-m-05": "做事總想快一點，拿著懷錶，句尾「快點」！",
+  "s4-m-06": "最愛吃美食，拿著叉子和盤子，句尾「吞吞」！",
+  "s4-m-07": "很有責任心的小消防員，拿著滅火器，句尾「滅火」！",
+  "s4-m-08": "懵懵懂懂卻很關心病人，拿著醫藥箱，句尾「嗶卟」！",
+  "s4-m-09": "最愛為大家加油，拿著綵帶球，句尾「加油」！",
+  "s4-m-10": "最愛修理東西，拿著扳手和工具箱，句尾「修理」！",
+  "s4-m-11": "愛嘗試新藥劑，拿著燒瓶和魔法杖，句尾「發明」！",
+  "s4-m-12": "最愛設計衣服，拿著捲尺和人台模型，句尾「時尚」！",
+  "s4-m-13": "很有正義感，拿著警哨和擴音器，句尾「站住」！",
+  "s4-m-14": "最愛自由自在地游泳，拿著海螺，句尾「人魚」！",
+  "s4-m-15": "最愛開派對，拿著派對喇叭和氣球，句尾「派對」！",
+  "s4-m-16": "最愛幫忙做造型，拿著剪刀和梳子，句尾「剪剪」！",
+  "s4-m-17": "容易生氣，拿著棒棒糖，句尾「氣氣」！",
+  "s4-m-18": "最愛唱歌拉琴，拿著小提琴和樂譜，句尾「啊啊」！",
+  "s4-m-19": "很優美的滑冰選手，拿著陀螺，句尾「轉轉」！",
+  "s4-m-20": "本季拿著黑珍珠權杖，很疼愛珍珠，句尾「棒棒」！"
+};
+  const PRI_BLURB = {
+  "s4-p-01": "樂美和愛心萌可一起變身成花神公主！",
+  "s4-p-02": "樂美和熱情萌可一起變身成太陽公主！",
+  "s4-p-03": "樂美和誠實萌可一起變身成彩雲公主！",
+  "s4-p-04": "樂美和好好萌可一起變身成雪花公主！",
+  "s4-p-05": "樂美和幸運萌可一起變身成暮光公主！",
+  "s4-p-06": "樂美和奉獻萌可一起變身成迷宮公主！"
+};
+  const TITLES = [
+  "迷迷糊糊，鑰匙萌可",
+  "變身！花神公主",
+  "暴食很危險，吞吞",
+  "火熱滾燙的露營事件",
+  "讓我來治癒你",
+  "萌可醫院成立了",
+  "加油加油，需要鼓勵",
+  "幫我修好，修理萌可",
+  "樂美和愛心萌可的身體互換了",
+  "白雪樂美",
+  "時尚萌可的服裝設計",
+  "給我站住，警察萌可",
+  "會闖禍的幸運餅乾",
+  "撲通撲通，人魚萌可",
+  "來場華麗的派對吧",
+  "做個好髮型，美髮萌可",
+  "爸爸的照相機",
+  "要耍小脾氣，氣氣萌可",
+  "尋找樂美的項鍊",
+  "唱歌的歌聲萌可",
+  "大家一起來玩吧，萌可遊樂園",
+  "滑著冰，轉圈圈",
+  "幸運萌可，登場！",
+  "萌可時裝秀",
+  "危機一觸即發，秘鑰之境",
+  "再見，鑰匙萌可"
+];
+  const NAMES = [
+  "愛心萌可",
+  "好好萌可",
+  "熱情萌可",
+  "誠實萌可",
+  "幸運萌可",
+  "快快萌可",
+  "吞吞萌可",
+  "滅火萌可",
+  "醫生萌可",
+  "加油萌可",
+  "修理萌可",
+  "發明萌可",
+  "時尚萌可",
+  "警察萌可",
+  "人魚萌可",
+  "派對萌可",
+  "美髮萌可",
+  "氣氣萌可",
+  "歌聲萌可",
+  "滑冰萌可",
+  "奉獻萌可"
+];
+  const HASHES = {
+  "audio/s4_op.m4a": "5c42ee6e9e218f39918a4c1cf40673c6d613b9e9c79ddf7d3cf395ef24aeee87",
+  "audio/s4_ed.m4a": "d5551d535ffc8dc481720fc80b5fb335da9e6f992054a463b6aea56f98397836",
+  "img/s4_stills/ep07_b.jpg": "b7501dc9bb89ab7316adf2a8c106acadc66977005c59602d605f2e9483feffca",
+  "img/s4_stills/ep19_b.jpg": "bb6463f1ca65da6246966f1ffd370843cad53b5ef0454009bc3cafc44c67a2d6",
+  "img/s4_stills/ep09_b.jpg": "ef5676a2affa8ca72a54c8b0a69f1ac2624d24e908f130924bf470783e6132fe",
+  "img/s4_stills/ep17_a.jpg": "ee969b44cc9b33f9c20ae411070f2897f2202d82d0c98d7ca05a2f73fb63727c",
+  "img/s4_stills/ep05_a.jpg": "fd32eb9f2e7fb83d1985e3e6d2204e849ad4c8098a2f4dcba63dd09c98ece121",
+  "img/s4_stills/ep04_b.jpg": "589ad4cee67c64324a581346a747eee5ba9affe4a667f599a9866e881ce3fbba",
+  "img/s4_stills/ep26_b.jpg": "b5b823dc8100e40771bc2c0c003cf5e4dad3aa0e6cffa44810656b4c1d6a61d3",
+  "img/s4_stills/ep22_b.jpg": "d8efef590638feed707c73a3e2c16da692191967b1259c0774d887203b733398",
+  "img/s4_stills/ep16_a.jpg": "635cd5b6b377a50211093ec897da1d18c132d9aa5b3e22e46e3e48e2c501d2a5",
+  "img/s4_stills/ep02_a.jpg": "c16a21f9288fadc6f5098a775025c6c0a8b621fb5f174cf67acf3a59c98ea679",
+  "img/s4_stills/ep23_b.jpg": "b808473c2e3e64145c800ae660b0ca43a416978500fda9e4527b53bfc898ae46",
+  "img/s4_stills/ep16_b.jpg": "e49078d13bd29fde9e53aeed83dfdd459083c6b71ce2214469d9660a61e58c7f",
+  "img/s4_stills/ep15_b.jpg": "8b81584f32ea68cbf6cdea799f8cde39ea66d6cfa29c04c36e20416546aeb32b",
+  "img/s4_stills/ep19_a.jpg": "9abd49497a851f437720657612edb751e16aa9a9d65eb473d174e09c062be1d5",
+  "img/s4_stills/ep14_b.jpg": "4a2b9a8d698c2c8ef16c0f68e881c952fe08997843ca4bb6b1d21dc6d87048ba",
+  "img/s4_stills/ep09_a.jpg": "6ac89cc55e496337d76678d59141314f859a6d1a3a1693c9c2831ec655f757b6",
+  "img/s4_stills/ep17_b.jpg": "8fe595e855ce75e852a788303315dd77847a42e92db1eda3d43e726f482d13b2",
+  "img/s4_stills/ep05_b.jpg": "60b3637f040ac42509b2f59161e6e351092081bbeb93771624417d50fcc28232",
+  "img/s4_stills/ep24_b.jpg": "d3468b6ac0d328336df1fcad4d1be5db88e545bbe60455c9745cb7a51707b400",
+  "img/s4_stills/ep03_a.jpg": "020d7bf6d091677eda50b64da19efc8f7adcd64cc5d0cf052f03f515a0b182b9",
+  "img/s4_stills/ep10_b.jpg": "20b5a17396d2de176a85cb02f4e1c30133a639903c993dfbd70b60bcb3bc809c",
+  "img/s4_stills/ep13_a.jpg": "ae75510307b434377bde8a7a2e18fb30e042d83062e287826ad3c2403af5863f",
+  "img/s4_stills/ep23_a.jpg": "48b815e8c21f8bbee95f45c356d354b089339d9978a7d909ab0d2c776ea3de67",
+  "img/s4_stills/ep13_b.jpg": "f8fa7c2c269e9a26544086aa1d317845fb846c5ebc63795a6bb4ce9b463aeeef",
+  "img/s4_stills/ep03_b.jpg": "ed74b41beb7fc9b39eaea92447d58850ce1e86191eb276b9f9a0efa334e43e0c",
+  "img/s4_stills/ep10_a.jpg": "bc446a94adced49ff1128c39b795df3d9e9b28c1595939204993ad46d3183079",
+  "img/s4_stills/ep22_a.jpg": "57f305eeca140b6ad811d013ca757eefdf2c26915fdb8a627744a982f4c29783",
+  "img/s4_stills/ep07_a.jpg": "dc54e3491903f2fd2c4eed022eedb58d6944153c81c8d2a3751423704298e31b",
+  "img/s4_stills/ep12_a.jpg": "948bfb4305791999e75e1a3006bcbf5fd461ff5552f8cd75ed2d783179a88468",
+  "img/s4_stills/ep04_a.jpg": "fe0567ca84cbb347bfaefec888c8ef072ac48b1368b885f9020c625687a1c2bf",
+  "img/s4_stills/ep14_a.jpg": "7d3e974ea98b6f5cd909deafd6594b887b37e9d7c3d3bbf195ab09967ee9e019",
+  "img/s4_stills/ep11_a.jpg": "9b3a50282f3c1122b7ec903a289507aebd6978b911bd45972f4b1f44e59a6359",
+  "img/s4_stills/ep18_b.jpg": "af9fa02bb83899b49099382b2e0696902eb35c319c95d9a9a8cb3b82a5d1635e",
+  "img/s4_stills/ep02_b.jpg": "bb55847fde66ea5d111a78d10dc0b643423ea75ae076d10ef59e1eeb61ea02df",
+  "img/s4_stills/ep11_b.jpg": "9fd575c5bb65cb752dc4f030fb52cec7711148a66f9d795a628261d1431c4e62",
+  "img/s4_stills/ep08_b.jpg": "5d579977b06679ddb59cfbef042b39b6a1e0a81f6c7d659adfb10e259cc6e64e",
+  "img/s4_stills/ep12_b.jpg": "b85271203d4034f73f055af3005f83e2875bd3957eb39994fa80a4909765d3e0",
+  "img/s4_stills/ep26_a.jpg": "f0ae89864fc5720aeae65de76844d5ab1a06771783289dc80bf46d15f58c940f",
+  "img/s4_stills/ep20_a.jpg": "5533fa29bd8202a652c79d4df07c7e17d3a10556b34ac145218c66bbe1bf3043",
+  "img/s4_stills/ep06_a.jpg": "77da2efcd07e7b94371533bb2323e1471c2673b4e7155feb766db81ce80b6506",
+  "img/s4_stills/ep01_b.jpg": "eec99677e461614f18e83a62d2ea29264bf59d017af6c0aa9c0f680790a2c788",
+  "img/s4_stills/ep01_a.jpg": "48f1ae30eea630d3c8cdf4386dadb338f51ed52765db86260bcf6f8c15aeefbe",
+  "img/s4_stills/ep20_b.jpg": "ca9abb10a365aeccd627c68840bc7dfb1409b37e1e879ad40d06d01a05ade9da",
+  "img/s4_stills/ep06_b.jpg": "d24cb8aff76dfa0a960aed388d481f623bf5f414f969ba24c3c3d83049540930",
+  "img/s4_stills/ep15_a.jpg": "cbb62f8a51fe8ddb28330c77229523ef3ec56085e1bf67f3e1da7fb41bfb3d43",
+  "img/s4_stills/ep08_a.jpg": "de3ee180487da218e547fb19e0ba3596605811cba6bca722eaf3b6107961a2c1",
+  "img/s4_stills/ep21_a.jpg": "135d77ddddf61343e1d2cf63cffad596ddb7cb8aefde20414c6e740583bf3f3f",
+  "img/s4_stills/ep25_a.jpg": "0be9eb34c73024db9bf03d182b8e0af2eddad67584adaff766e219381ba70bbb",
+  "img/s4_stills/ep18_a.jpg": "f29cccf0315ed3935aad8ef9855ec16ef9e53680dc143fa8234ce7e6dffab308",
+  "img/s4_stills/ep24_a.jpg": "940a9c59663e0602e23bcb8e56fb7f8fce8a33747039d257b15261826d9278bd",
+  "img/s4_stills/ep21_b.jpg": "93bbd4775caf8423450f42610cd02a0024905d1c8c2acd7421f2137a6240de3f",
+  "img/s4_stills/ep25_b.jpg": "cbfe326ae628d5d57ec405a2eba2f571e7fcf8c9af5086e527c7115213eb12a1",
+  "img/s4_princess/06_migong.jpg": "33460a19bfd6754bd81cd242e9050bfc246c7ff2deab4c01aceae9fb087417c2",
+  "img/s4_princess/02_taiyang.jpg": "e7af14081d6bdabf83bf35b7201ec34fd62f1e41fc9e4354ecbff0afff2ff522",
+  "img/s4_princess/03_caiyun.jpg": "9955cd8d61bdb73fbcfb7e4db9e922c303d8f15c1148aae53356d78cbec67f4b",
+  "img/s4_princess/04_xuehua.jpg": "1306a9ec2b3cf8cec8df309548ff804d98f10583d4406f2b502546fc636f4471",
+  "img/s4_princess/05_muguang.jpg": "4449a8c0e9d498564315435958648529efe3a48960d6a3c67b4c212e8cd1792b",
+  "img/s4_princess/01_huashen.jpg": "881e978026afea5456432ca0067e0cb60afb2b86a50e0265fe5b80268a860f49",
+  "img/s4/04_xingyun.jpg": "9bdaedc571e99ee8eb412bc25d5590a905a95da17f8a9aaaca09d6e23090fd3a",
+  "img/s4/08_yisheng.jpg": "d318d0526fb72d27125bc33150698fb70a3a285d676a88870c55dca32d67301c",
+  "img/s4/07_miehuo.jpg": "ca56ee716c4d2f0be66231658d6d4b3a174d03857db55cd192eba44a51b59908",
+  "img/s4/17_qiqi.jpg": "c55e0d3d17a8a3732c8058d8481da1d860a64cdda52b575810581f7d82b40c60",
+  "img/s4/14_renyu.jpg": "8b4f1f5cb00fdbdfa4229feb9476bddeba8702bb020aebab38ce68af6390fa01",
+  "img/s4/11_faming.jpg": "05583dd126bbceecedf199d9084af381a374518a81356eeedd311b73fdf84689",
+  "img/s4/02_reqing.jpg": "878670a61a9914e3e9fbbbe1ac505fa12413f2f79f2c83a87badd74077c92bcc",
+  "img/s4/01_haohao.jpg": "911a27801037951519916e90e12ce8f1b67ba788b7c33ae61fd1978dcd592aed",
+  "img/s4/18_gesheng.jpg": "d69e23018ec6b56885ead02868a1abcbfbad7cce36de882520deb230e1740bec",
+  "img/s4/00_aixin_s3.jpg": "be086e26dc6c2bc79c1911a8cdfe9145f416b35db81249dfb4b74bcfe3e48c85",
+  "img/s4/05_kuaikuai.jpg": "fa538e7bda148fda5d0d551c79836bf9eb011da910d16d5d2da72d4ab26c445f",
+  "img/s4/20_fengxian.jpg": "c79ce4c0d333f8af8f57422e4a3c5ac706f3240a929226574d297f4df830fcfc",
+  "img/s4/15_paidui.jpg": "8310f351928ab6060b33e26672edf0e23e860afa2e7df6e11da8201d13d9b854",
+  "img/s4/03_chengshi.jpg": "ac591636da805e6fa511f6b5e5d962b34207bbff40b735ad891b264496018fc6",
+  "img/s4/16_meifa.jpg": "8c90660d9aa1388182044ceeaae12bf2b34cde112fdd21a731d971d03c358758",
+  "img/s4/19_huabing.jpg": "318ef69d572327b9fa90504cd01556998fffa2fbd4491fa51763199e05d4102b",
+  "img/s4/09_jiayou.jpg": "ab3d8c98642329a6410abdcd14e72a6b4d942fcb0e3a5e3d184e48ae2e924108",
+  "img/s4/13_jingcha.jpg": "985ef8725a989f0f87cd3b16a5a26548b44593a608471aa3ac6aef81136b7563",
+  "img/s4/06_tuntun.jpg": "213111b8ec0f13aeefce1c526b67fa1fede9cbe180b3c2384b68ffbaff5762d9",
+  "img/s4/10_xiuli.jpg": "e4d7515d6a9631a1a172e0618d423aff8274beccde402f3557a5ed91edbf2ab1",
+  "img/s4/12_shishang.jpg": "e146313630bcefe11fc470f1f80f0d838af7bae370d44fb671bee6c2ceb95b50"
+};
+
+  eq(DATA.version, "v21", "data.js 版本 v21");
+  eq(S4.id, "s4");
+  eq(S4.name, "魔法鑰匙");
+  ok(S4.open === true, "第四季 open");
+  eq(S4.total, S4TOTAL);
+  eq(S4.first && S4.first.length, 1);
+  eq(S4.first && S4.first[0], "s4-m-00");
+  eq(S4.earlyWindow, 24, "早期窗口 24：好好／熱情／誠實連同公主可在窗口內出完");
+  eq(S4.finalItem, S4FINAL);
+  eq(S4.completeTitle, "恭喜集齊魔法鑰匙！");
+  eq(S4.lockedText, "魔法鑰匙 敬請期待");
+  eq(S4.transform && S4.transform.from, "s3-m-20");
+  eq(S4.transform && S4.transform.to, "s4-m-00");
+  eq(S4.music && S4.music.op && S4.music.op.src, "audio/s4_op.m4a");
+  eq(S4.music.op.type, "audio/mp4");
+  eq(S4.music.op.title, "魔法鑰匙");
+  eq(S4.music.op.duration, 57.934);
+  ok(!S4.music.op.instrumental, "片頭曲有人聲");
+  eq(S4.music.home.src, "audio/s4_ed.m4a");
+  eq(S4.music.home.type, "audio/mp4");
+  eq(S4.music.home.title, "魔法鑰匙");
+  eq(S4.music.home.instrumental, true);
+  eq(S4.music.home.duration, 18.088);
+  eq(L.season("s2").music, null, "第二季仍然沒有自己的歌");
+  eq(L.season("s1").transform, undefined);
+  eq(L.season("s2").transform.from, "s1-m-24");
+  eq(L.season("s2").transform.to, "s2-m-01");
+  eq(L.byId["s1-m-24"].name, "鬧鬧萌可");
+  eq(L.byId["s2-m-01"].name, "幸福萌可");
+
+  eq(s4.length, S4TOTAL, "第四季 79 張");
+  eq(s4.filter((i) => i.type === "momoke").length, 21);
+  eq(s4.filter((i) => i.type === "princess").length, 6);
+  eq(s4.filter((i) => i.type === "still").length, 52);
+  eq(DATA.items.filter((i) => i.season === "s1").length, 81, "第一季仍是 81 張");
+  eq(DATA.items.filter((i) => i.season === "s2").length, 74, "第二季仍是 74 張");
+  eq(DATA.items.filter((i) => i.season === "s3").length, 76, "第三季仍是 76 張");
+  eq(L.season("s3").name, "閃亮寶石");
+  eq(L.season("s3").total, 76);
+  ok(DATA.items.filter((i) => i.season === "s3").every((i) => /^img\/s3_gem/.test(i.img)), "第三季圖片路徑維持 s3_gem");
+  ok(!DATA.items.some((i) => /護士/.test((i.name || "") + (i.blurb || "") + i.id + (i.img || ""))), "沒有護士萌可");
+  eq(new Set(DATA.items.map((i) => i.id)).size, DATA.items.length, "全部 id 不重複");
+
+  const ms = s4.filter((i) => i.type === "momoke");
+  assert.deepStrictEqual(ms.map((m) => m.name), NAMES, "第四季萌可名稱與次序");
+  assert.deepStrictEqual(ms.map((m) => m.id), NAMES.map((_, i) => "s4-m-" + String(i).padStart(2, "0")));
+  eq(ms.filter((m) => m.category === "royal").length, 6, "皇室六位（含奉獻）");
+  eq(ms.filter((m) => m.category === "key").length, 15, "15 鑰匙萌可");
+  ["s4-m-00", "s4-m-01", "s4-m-02", "s4-m-03", "s4-m-04", S4FINAL].forEach((id) => eq(L.byId[id].category, "royal", id));
+  ms.filter((m) => m.category === "key").forEach((m) => ok(!m.princess, m.id + " 不是皇室"));
+  ms.forEach((m) => {
+    eq(m.blurb, MOM_BLURB[m.id], "萌可簡介原文 " + m.id);
+    eq(m.type, "momoke");
+    eq(m.season, "s4");
+    ok(/^img\/s4\//.test(m.img), m.img);
+  });
+  const ps = s4.filter((i) => i.type === "princess");
+  eq(ps.map((p) => p.id).join(","), "s4-p-01,s4-p-02,s4-p-03,s4-p-04,s4-p-05,s4-p-06");
+  eq(ps.map((p) => p.name).join(","), "花神公主,太陽公主,彩雲公主,雪花公主,暮光公主,迷宮公主");
+  Object.entries(PAIRS).forEach(([royal, princess]) => {
+    eq(L.byId[royal].princess, princess);
+    eq(L.byId[princess].royal, royal);
+    eq(L.byId[princess].blurb, PRI_BLURB[princess], "公主簡介 " + princess);
+    eq(L.byId[princess].type, "princess");
+    ok(/^img\/s4_princess\//.test(L.byId[princess].img));
+  });
+  const stl = s4.filter((i) => i.type === "still");
+  const efiles = [];
+  for (let e = 1; e <= 26; e++) for (const ab of ["a", "b"]) efiles.push("ep" + String(e).padStart(2, "0") + "_" + ab + ".jpg");
+  assert.deepStrictEqual(stl.map((x) => path.basename(x.img)), efiles, "第四季劇照次序");
+  eq(TITLES.length, 26);
+  stl.forEach((x) => {
+    eq(x.name, TITLES[x.ep - 1], x.id + " name");
+    eq(x.blurb, "第" + x.ep + "集〈" + TITLES[x.ep - 1] + "〉", x.id + " blurb");
+    eq(x.id, "s4-still-ep" + String(x.ep).padStart(2, "0") + path.basename(x.img).slice(-5, -4), x.id);
+    ok(/^img\/s4_stills\//.test(x.img));
+  });
+
+  function jpegSize(file) {
+    const b = fs.readFileSync(file);
+    let i = 2;
+    while (i < b.length - 8) {
+      if (b[i] !== 0xFF) { i++; continue; }
+      const marker = b[i + 1];
+      if (marker === 0xC0 || marker === 0xC1 || marker === 0xC2) {
+        return { h: b.readUInt16BE(i + 5), w: b.readUInt16BE(i + 7) };
+      }
+      if (marker === 0xD8 || marker === 0xD9 || (marker >= 0xD0 && marker <= 0xD7)) { i += 2; continue; }
+      i += 2 + b.readUInt16BE(i + 2);
+    }
+    throw new Error("不是 JPEG " + file);
+  }
+  Object.entries(HASHES).forEach(([rel, hex]) => {
+    const abs = path.join(__dirname, "..", rel);
+    ok(fs.existsSync(abs), "檔案存在 " + rel);
+    const got = crypto.createHash("sha256").update(fs.readFileSync(abs)).digest("hex");
+    eq(got, hex, "原檔未改 " + rel);
+  });
+  s4.forEach((i) => {
+    const wh = jpegSize(path.join(__dirname, "..", i.img));
+    if (i.type === "still") { eq(wh.w, 1280, i.img); eq(wh.h, 720, i.img); }
+    else { eq(wh.w, 1080, i.img); eq(wh.h, 1080, i.img); }
+  });
+  const sw = fs.readFileSync(path.join(__dirname, "..", "sw.js"), "utf8");
+  ok(/\(self\.MOMOKE_DATA\.items \|\| \[\]\)/.test(sw), "卡片圖由 sw.js 跟 data.js 快取");
+  ok(/s\.music\[k\]\.src/.test(sw), "季節音樂由 sw.js 快取");
+  eq((/var VERSION = "(v\d+)"/.exec(sw) || [])[1], "v21", "sw.js VERSION v21");
+
+  const priorSeasons = () => DATA.items.filter((it) => it.season === "s1" || it.season === "s2" || it.season === "s3");
+  const baseS3 = () => {
+    const st = L.emptyState();
+    priorSeasons().forEach((it) => st.collected.push({ id: it.id, t: 0, d: "2027-03-01", s: null }));
+    return st;
+  };
+  {
+    const locked = baseS3();
+    locked.collected = locked.collected.filter((c) => c.id !== "s3-m-20");
+    eq(L.collectedIn(locked, "s3").length, 75);
+    ok(!L.seasonUnlocked(locked, "s4"), "75/76：第四季未開放");
+    eq(L.applyUnlocks(locked, 0).length, 0);
+    eq(L.albumSeasonOpen(locked, "s4", false), false);
+    const closed = L.albumView(locked, "s4", false);
+    eq(closed.open, false);
+    eq(closed.items.length, 0, "未解鎖畫冊不列出魔法鑰匙");
+    const before = JSON.stringify(locked);
+    eq(L.isUatMode("?uat=1"), true);
+    eq(L.albumSeasonOpen(locked, "s1", true), true);
+    eq(L.albumSeasonOpen(locked, "s2", true), true);
+    eq(L.albumSeasonOpen(locked, "s3", true), true);
+    eq(L.albumSeasonOpen(locked, "s4", true), true);
+    const preview = L.albumView(locked, "s4", true);
+    eq(preview.open, true);
+    eq(preview.items.length, 79, "預覽列出第四季 79 張");
+    ok(preview.items.every((row) => row.revealed && !row.collected), "預覽看得到、但不算已收集");
+    const types = { momoke: 0, princess: 0, still: 0 };
+    preview.items.forEach((row) => { types[row.type]++; });
+    eq(types.momoke, 21); eq(types.princess, 6); eq(types.still, 52);
+    eq(L.albumView(locked, "s1", true).items.length, 81);
+    eq(L.albumView(locked, "s2", true).items.length, 74);
+    eq(L.albumView(locked, "s3", true).items.length, 76);
+    eq(JSON.stringify(locked), before, "?uat=1 不寫入收集");
+    ok(!L.seasonUnlocked(locked, "s4"), "預覽沒有真的解鎖第四季");
+    eq(L.currentSeasonId(locked), "s3");
+    eq(L.drawNext(locked, rng(1)), "s3-m-20", "未集齊第三季時下一張仍是奉獻萌可");
+  }
+  {
+    const st = baseS3();
+    ok(L.isSeasonComplete(st, "s3"));
+    ok(L.seasonUnlocked(st, "s4"), "集齊第三季後開放第四季");
+    ok(!L.collectedSet(st)["s4-m-00"]);
+    eq(L.drawNext(st, rng(2)), "s4-m-00", "若贈卡還沒寫入，第一抽仍是愛心本季造型");
+    eq(L.drawNextS4(st.collected.map((c) => c.id), rng(2)), "s4-m-00");
+    const granted = L.applyUnlocks(st, T("2027-03-02T08:00"));
+    eq(granted.length, 1);
+    eq(granted[0].season, "s4");
+    eq(granted[0].item.id, "s4-m-00");
+    eq(granted[0].from && granted[0].from.id, "s3-m-20");
+    eq(st.collected[st.collected.length - 1].id, "s4-m-00");
+    eq(st.collected[st.collected.length - 1].s, null, "贈卡不佔刷牙時段");
+    eq(L.applyUnlocks(st, 0).length, 0, "只送一次");
+    eq(L.pendingNews(st), "s4");
+    eq(L.currentSeasonId(st), "s4");
+    eq(L.displaySeasonId(st), "s4");
+    eq(L.collectedIn(st, "s1").length, 81);
+    eq(L.collectedIn(st, "s2").length, 74);
+    eq(L.collectedIn(st, "s3").length, 76, "第三季 76 張仍在");
+    eq(L.drawNext(st, rng(3)), "s4-p-01", "下一張是花神公主");
+    eq(L.drawNextS4(st.collected.map((c) => c.id), rng(3)), "s4-p-01");
+  }
+  {
+    const st = baseS3();
+    st.collected = st.collected.filter((c) => c.id !== "s3-m-20");
+    const r = L.recordBrush(st, T("2027-03-01T08:00"), T("2027-03-01T08:02"), rng(4));
+    eq(r.kind, "capture");
+    eq(r.item.id, "s3-m-20");
+    eq(r.number, 76);
+    eq(r.seasonComplete, "s3");
+    eq(r.unlock && r.unlock.item.id, "s4-m-00");
+    eq(r.unlock.from.id, "s3-m-20");
+    eq(st.days["2027-03-01"].mc, "s3-m-20", "日曆記刷牙得到的奉獻萌可");
+    eq(L.cardsOnDay(st.days["2027-03-01"]), 1);
+    eq(L.collectedIn(st, "s4").length, 1);
+    eq(L.collectedSet(st)["s3-m-20"], true);
+    eq(L.pendingNews(st), "s4");
+  }
+
+  const earlyIds = new Set(["s4-m-00", "s4-p-01"].concat(EARLY, EARLY.map((id) => PAIRS[id])));
+  const checkS4 = (seq, label) => {
+    eq(seq.length, S4TOTAL, label + " 共 79 張");
+    eq(new Set(seq).size, S4TOTAL, label + " 不重複");
+    eq(seq[0], "s4-m-00", label + " 第 1 張愛心萌可");
+    eq(seq[1], "s4-p-01", label + " 第 2 張花神公主");
+    eq(seq[S4TOTAL - 2], HELD, label + " 倒數第二是迷宮公主");
+    eq(seq[S4TOTAL - 1], S4FINAL, label + " 最後是奉獻萌可");
+    ok(seq.every((x) => L.byId[x].season === "s4"), label + " 只有第四季");
+    ["s4-m-00", "s4-m-01", "s4-m-02", "s4-m-03", LATE].forEach((royal) => {
+      eq(seq[seq.indexOf(royal) + 1], PAIRS[royal], label + " " + L.byId[royal].name + " 之後緊接公主");
+    });
+    eq(seq.indexOf(HELD), seq.indexOf(S4FINAL) - 1, label + " 迷宮緊接在奉獻之前");
+    ok(seq.indexOf(HELD) > seq.indexOf(LATE_P), label + " 迷宮在暮光之後");
+    for (let i = 0; i < S4.earlyWindow; i++) {
+      const it = L.byId[seq[i]];
+      ok(it.type === "still" || earlyIds.has(seq[i]), label + " 窗口內 @" + i + " 是 " + seq[i]);
+    }
+    EARLY.forEach((id) => ok(seq.indexOf(PAIRS[id]) < S4.earlyWindow, label + " " + L.byId[id].name + " 的公主在第 " + S4.earlyWindow + " 張內"));
+    ok(seq.indexOf(LATE) >= S4.earlyWindow, label + " 幸運在早期窗口之後");
+    ok(seq.indexOf(LATE_P) >= S4.earlyWindow, label + " 暮光在早期窗口之後");
+    eq(seq.indexOf(LATE_P), seq.indexOf(LATE) + 1, label + " 暮光緊接幸運");
+    s4.filter((i) => i.category === "key").forEach((i) => ok(seq.indexOf(i.id) >= S4.earlyWindow, label + " " + i.name + " 在窗口之後"));
+    ok(!seq.slice(0, S4.earlyWindow).includes(LATE), label + " 幸運不在早期窗口");
+    ok(!seq.slice(0, S4.earlyWindow).includes(S4FINAL), label + " 奉獻不在早期窗口");
+    ok(!seq.slice(0, S4.earlyWindow).includes(HELD), label + " 迷宮不在早期窗口");
+  };
+
+  let earlyPos = 0, earlyN = 0, stillBefore = 0, midStill = 0;
+  const RUNS = 2000;
+  for (let run = 0; run < RUNS; run++) {
+    const R = rng(800000 + run);
+    const st = baseS3();
+    eq(L.applyUnlocks(st, 0).length, 1);
+    const seq = ["s4-m-00"];
+    let id;
+    while (L.collectedIn(st, "s4").length < S4TOTAL && (id = L.drawNext(st, R))) {
+      st.collected.push({ id, t: 0, d: null, s: null });
+      seq.push(id);
+      st.pending = null;
+      ok(seq.length <= S4TOTAL, "不可多於 79 張");
+    }
+    checkS4(seq, "模擬 " + run);
+    eq(L.drawNext(st, R), null, "四季集齊後不再抽");
+    eq(L.currentSeasonId(st), null, "四季集齊後沒有下一季");
+    EARLY.forEach((id) => { earlyPos += seq.indexOf(id) + 1; earlyN++; });
+    const lastEarly = Math.max.apply(null, EARLY.map((id) => seq.indexOf(id)));
+    if (seq.slice(0, lastEarly).some((id) => L.byId[id].type === "still")) stillBefore++;
+    if (L.byId[seq[S4.earlyWindow]].type === "still") midStill++;
+    if (run === 0) {
+      const seq2 = [];
+      const R2 = rng(800000);
+      for (;;) {
+        const id2 = L.drawNextS4(seq2, R2);
+        if (!id2) break;
+        seq2.push(id2);
+        ok(seq2.length <= S4TOTAL, "drawNextS4 不超抽");
+      }
+      assert.deepStrictEqual(seq2, seq, "drawNextS4 與 drawNext 同一序列");
+    }
+  }
+  ok(earlyPos / earlyN < 14, "好好／熱情／誠實平均偏早 (" + (earlyPos / earlyN).toFixed(1) + ")");
+  ok(stillBefore / RUNS > 0.5, "劇照會穿插在早期皇室之間 (" + (stillBefore / RUNS).toFixed(2) + ")");
+  const midP = 36 / 52;
+  ok(Math.abs(midStill / RUNS - midP) < 0.05, "窗口之後鑰匙萌可、幸運與剩下的劇照平均混合 (" + (midStill / RUNS).toFixed(3) + ")");
+  for (const fixed of [0, 0.999999, 0.5]) {
+    const st = baseS3();
+    L.applyUnlocks(st, 0);
+    const seq = ["s4-m-00"];
+    let id;
+    while (L.collectedIn(st, "s4").length < S4TOTAL && (id = L.drawNext(st, () => fixed))) {
+      st.collected.push({ id, t: 0, d: null, s: null });
+      seq.push(id);
+    }
+    checkS4(seq, "固定亂數 " + fixed);
+  }
+
+  {
+    const plain = Date.UTC(2026, 9, 23, 4);
+    const st = baseS3();
+    L.applyUnlocks(st, 0);
+    eq(L.songFor(st, "op", plain).src, "audio/s4_op.m4a", "第四季刷牙播片頭曲");
+    eq(L.songFor(st, "op", plain).season, "s4");
+    eq(L.songFor(st, "op", plain).title, "魔法鑰匙");
+    eq(L.songFor(st, "home", plain).src, "audio/s4_ed.m4a", "第四季首頁播片尾純音樂");
+    eq(L.songFor(st, "home", plain).instrumental, true);
+    eq(L.songFor(st, "home", plain).kind, "home");
+    const hw = Date.UTC(2026, 9, 28, 4);
+    eq(L.isHalloween(hw), true);
+    eq(L.songFor(st, "op", hw).src, "audio/halloween.m4a", "萬聖節仍覆寫第四季刷牙歌");
+    eq(L.songFor(st, "home", hw).src, "audio/halloween.m4a", "萬聖節仍覆寫第四季首頁歌");
+    eq(L.songFor(st, "home", hw).season, "halloween");
+    const xm = Date.UTC(2026, 11, 24, 4);
+    eq(L.isChristmas(xm), true);
+    eq(L.christmasFor(xm).trackId, "teeniepingmas");
+    eq(L.songFor(st, "op", xm).src, "audio/christmas/teeniepingmas.m4a", "聖誕仍覆寫第四季刷牙歌");
+    eq(L.songFor(st, "home", xm).src, "audio/christmas/teeniepingmas.m4a", "聖誕仍覆寫第四季首頁歌");
+    eq(L.songFor(st, "home", xm).season, "christmas");
+    eq(L.songFor(st, "home", xm).src, L.songFor(st, "op", xm).src);
+    const s2st = L.emptyState();
+    DATA.items.filter((i) => i.season === "s1").forEach((i) => s2st.collected.push({ id: i.id, t: 0, d: null, s: null }));
+    L.applyUnlocks(s2st, 0);
+    eq(L.currentSeasonId(s2st), "s2");
+    eq(L.songFor(s2st, "op", plain).src, "audio/s1_op.m4a", "第二季沒有歌時刷牙沿用第一季");
+    eq(L.songFor(s2st, "home", plain).src, "audio/s1_home.m4a", "第二季沒有歌時首頁沿用第一季純音樂");
+    const s3st = L.emptyState();
+    DATA.items.filter((i) => i.season === "s1" || i.season === "s2").forEach((i) => s3st.collected.push({ id: i.id, t: 0, d: null, s: null }));
+    L.applyUnlocks(s3st, 0);
+    eq(L.currentSeasonId(s3st), "s3");
+    eq(L.songFor(s3st, "op", plain).src, "audio/s3_gem_op.m4a", "第三季進行中仍播閃亮寶石片頭");
+    eq(L.songFor(s3st, "home", plain).src, "audio/s3_gem_ed.m4a", "第三季進行中仍播閃亮寶石片尾");
+  }
+  console.log("✓ 第四季：79 張、愛心第 1、花神第 2、好好／熱情／誠實在窗口內且公主緊接、幸運與暮光在窗口後、迷宮緊接奉獻之前、奉獻最後、第三季集齊後贈送、預覽不改進度、節日覆寫仍在（早期皇室平均位置 " + (earlyPos / earlyN).toFixed(1) + "）");
 }
 console.log(`全部測試通過（${checks} 項斷言）`);
